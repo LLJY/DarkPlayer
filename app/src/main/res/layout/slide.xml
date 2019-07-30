@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/toolbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@color/cardview_dark_background"
+        app:layout_constraintTop_toTopOf="parent"
+        android:clickable="true"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/albumArtTop"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:scaleType="fitXY"
+            android:adjustViewBounds="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginStart="10dp"
+            app:srcCompat="@android:drawable/stat_sys_headset" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintLeft_toRightOf="@+id/albumArtTop"
+            android:text="Song Title"
+            android:textSize="16sp"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/artist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/title"
+            android:layout_marginTop="8dp"
+            android:text="Artist"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="@+id/title"
+            app:layout_constraintTop_toBottomOf="@+id/title" />
+        <ImageButton
+            android:id="@+id/button3"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_alignParentRight="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="10dp"
+            app:srcCompat="@drawable/play"
+            style="?android:attr/borderlessButtonStyle" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@color/cardview_dark_background"
+        android:clickable="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="1.0">
+
+        <ImageButton
+            android:id="@+id/button2"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/play"
+            style="?android:attr/borderlessButtonStyle"/>
+
+        <ImageButton
+            android:id="@+id/button1"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/button2"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@android:drawable/ic_media_previous" />
+
+        <ImageButton
+            android:id="@+id/button"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/button2"
+            android:layout_marginStart="20dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@android:drawable/ic_media_next"
+            style="?android:attr/borderlessButtonStyle" />
+
+        <SeekBar
+            android:id="@+id/seekBar"
+            app:layout_constraintBottom_toTopOf="@+id/button2"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+        <TextView
+            android:id="@+id/seekTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:textColor="@android:color/white"
+            android:text="00:00"
+            app:layout_constraintStart_toStartOf="@+id/seekBar"
+            app:layout_constraintTop_toTopOf="@id/seekBar" />
+
+        <TextView
+            android:id="@+id/seekEnd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="@android:color/white"
+            android:text="00:00"
+            app:layout_constraintEnd_toEndOf="@+id/seekBar"
+            app:layout_constraintTop_toTopOf="@id/seekBar" />
+
+        <ImageButton
+            android:id="@+id/shuffle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:scaleType="fitXY"
+            android:adjustViewBounds="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/button1"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_shuffle_white_48dp"
+            style="?android:attr/borderlessButtonStyle"/>
+
+        <ImageButton
+            android:id="@+id/loop"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:scaleType="fitXY"
+            android:adjustViewBounds="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/button"
+            android:layout_marginStart="20dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_repeat_white_48dp"
+            style="?android:attr/borderlessButtonStyle"/>
+
+        <ImageView
+            android:id="@+id/shuffle_on"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            app:layout_constraintBottom_toBottomOf="@+id/shuffle"
+            app:layout_constraintEnd_toEndOf="@+id/shuffle"
+            app:layout_constraintStart_toStartOf="@+id/shuffle"
+            app:srcCompat="@drawable/circle" />
+
+        <ImageView
+            android:id="@+id/loop_on"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            app:layout_constraintBottom_toBottomOf="@+id/loop"
+            app:layout_constraintEnd_toEndOf="@+id/loop"
+            app:layout_constraintStart_toStartOf="@+id/loop"
+            app:srcCompat="@drawable/circle" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <ImageView
+        android:id="@+id/albumArtBig"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_centerInParent="true"
+        android:adjustViewBounds="true"
+        app:layout_constraintBottom_toTopOf="@+id/relativeLayout"  android:clickable="false"
+        android:scaleType="centerCrop"
+
+        app:layout_constraintTop_toBottomOf="@id/toolbar_layout"
+        app:srcCompat="@android:drawable/stat_sys_headset"
+        tools:layout_editor_absoluteX="0dp" />
+
+    </android.support.constraint.ConstraintLayout>

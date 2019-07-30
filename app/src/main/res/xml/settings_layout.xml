@@ -1,0 +1,28 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:background="#121212"
+    android:layout_width="match_parent">
+
+    <SwitchPreferenceCompat
+        android:id="@+id/shake"
+        android:key="sts"
+        android:textColor="@android:color/white"
+        app:title="Shake To Shuffle"
+        android:summary="Shake Device to Shuffle Music!!"/>
+
+    <Preference
+        android:id="@+id/eq"
+        android:key="Equalizer"
+        android:textColor="@android:color/white"
+        android:summary="Launches System Equalizer"
+        app:title="Equalizer" />
+
+    <Preference
+        android:key="feedback"
+        android:textColor="@android:color/white"
+        android:summary="Report technical issues or suggest new features"
+        app:title="Send feedback" />
+
+
+</PreferenceScreen>

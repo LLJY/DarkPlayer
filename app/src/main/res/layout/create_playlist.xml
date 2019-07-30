@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212"
+    android:id="@+id/create_playlist"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/create_playlist_const"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/done_button">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/create_playlist_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="@id/create_playlist_const" />
+    </android.support.constraint.ConstraintLayout>
+
+
+    <Button
+        android:id="@+id/done_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Done"
+        android:textColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/playlist_name"
+        android:color="@color/cardview_dark_background"
+        style="?android:attr/borderlessButtonStyle" />
+
+    <EditText
+        android:id="@+id/playlist_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/white"
+        android:maxLength="20"
+        android:hint="Playlist Name"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</android.support.constraint.ConstraintLayout>

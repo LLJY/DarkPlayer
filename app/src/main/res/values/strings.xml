@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Dark Player</string>
+    <string name="title_activity_playlist_inflater">PlaylistInflaterActivity</string>
+</resources>
