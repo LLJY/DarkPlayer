@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/cstrl"
@@ -25,6 +24,18 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintTop_toTopOf="@id/playlistconst" />
+
+        <TextView
+            android:id="@+id/no_songs_playlist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No Playlists Added :("
+            android:textColor="@android:color/darker_gray"
+            android:textSize="36sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </android.support.constraint.ConstraintLayout>
     </android.support.v4.widget.SwipeRefreshLayout>
 
@@ -33,7 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:color="@color/cardview_dark_background"
-        android:textColor="@color/android:white"
+        android:textColor="@android:color/white"
         android:text="+ Add New Playlist"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

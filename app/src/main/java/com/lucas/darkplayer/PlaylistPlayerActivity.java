@@ -24,6 +24,7 @@ public class PlaylistPlayerActivity extends AppCompatActivity {
         transaction.addToBackStack(null);  // if written, this transaction will be added to backstack
         transaction.commit();
     }
+
     @Override
     public void onBackPressed(){
         Intent intent = new Intent(PlaylistPlayerActivity.this, DefaultTab.class);
@@ -31,5 +32,6 @@ public class PlaylistPlayerActivity extends AppCompatActivity {
         //where there will be an infinite loop of activities when back is pressed
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-        }
+
+    }
 }

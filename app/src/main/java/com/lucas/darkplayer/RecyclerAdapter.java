@@ -52,9 +52,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<viewHolder> {
         holder.imageView.setImageURI(null);
         holder.imageView.setImageURI(list.get(position).getAlbumArt());
         if(SongFragment.shuffleList[SongFragment.songInList] == position) {
-            holder.playPause.setImageResource(R.drawable.pause);
+            holder.playPause.setVisibility(View.VISIBLE);
         }else{
-            holder.playPause.setImageResource(R.drawable.play);
+            holder.playPause.setVisibility(View.GONE);
         }
     }
 

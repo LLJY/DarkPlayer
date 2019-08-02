@@ -28,6 +28,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         addPreferencesFromResource(R.xml.settings_layout);
         Preference eq = findPreference("Equalizer");
         Preference fb = findPreference("feedback");
+        Preference reset = findPreference("reset");
         eq.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -47,6 +48,14 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             public boolean onPreferenceClick(Preference preference) {
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/dpapktesting"));
                 startActivity(browserIntent);
+                return false;
+            }
+        });
+        reset.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                SettingsDialogFragment dialog = new SettingsDialogFragment();
+                dialog.show(getFragmentManager(), "dialog");
                 return false;
             }
         });

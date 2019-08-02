@@ -1,6 +1,5 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:card_view="http://schemas.android.com/tools"
     android:id="@+id/frameView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -20,8 +19,8 @@
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="30dp"
-            android:layout_height="wrap_content"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:layout_marginRight="16dp"
@@ -30,11 +29,14 @@
 
         <ImageView
             android:id="@+id/playPause"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
             android:layout_alignParentRight="true"
-            android:layout_marginLeft="16dp"
-            app:srcCompat="@drawable/pause" />
+            android:layout_gravity="center"
+            android:layout_marginTop="2dp"
+            android:scaleType="fitXY"
+            android:visibility="visible"
+            app:srcCompat="@drawable/circle" />
 
         <TextView
             android:id="@+id/title"

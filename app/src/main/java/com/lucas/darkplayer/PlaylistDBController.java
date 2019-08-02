@@ -14,9 +14,13 @@ package com.lucas.darkplayer;
  *        You should have received a copy of the GNU General Public License
  *        along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.MediaStore;
 
 import java.util.ArrayList;
 /*
@@ -53,7 +57,7 @@ public class PlaylistDBController {
             String title = cursor.getString(cursor.getColumnIndex("title"));
             String album = cursor.getString(cursor.getColumnIndex("album"));
             String artist = cursor.getString(cursor.getColumnIndex("artist"));
-            Uri albumArtUri = Uri.parse(cursor.getString(cursor.getColumnIndex("album_art")));
+            String albumArtUri = cursor.getString(cursor.getColumnIndex("album_art"));
             audioList.add(new SongData(data, title, album, artist, albumArtUri));
         }
         cursor.close();
@@ -81,6 +85,30 @@ public class PlaylistDBController {
 
     }
 
+    public static ArrayList<SongData> findAudio(Context context) {
+        ContentResolver contentResolver = context.getContentResolver();
+        ArrayList<SongData> list = new ArrayList<>();
+        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        String selection = MediaStore.Audio.Media.IS_MUSIC;
+        String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
+        Cursor cursor = contentResolver.query(uri, null, selection, null, sortOrder);
+        if (cursor != null && cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+                String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
+                String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
+                String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                Long albumId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+                Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
+                Uri albumUri = ContentUris.withAppendedId(sArtworkUri, albumId);
+                String albumArtUri = albumUri.toString();
+                list.add(new SongData(data, title, album, artist, albumArtUri));
+            }
+        }
+        cursor.close();
+        return list;
+    }
+
     public static void insertPlaylist(Context context, PlaylistData playlist){
 
     }
@@ -95,6 +123,13 @@ public class PlaylistDBController {
                 db.playlistDao().deletePlaylist(playlists.get(i));
             }
         }
+    }
+
+    public static void nukeDatabase(Context context) {
+        PlaylistDB db;
+        db = PlaylistDB.getInstance(context);
+        db.playlistDao().resetPlaylist();
+
     }
 
 }

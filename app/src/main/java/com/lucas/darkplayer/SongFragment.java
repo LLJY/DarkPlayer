@@ -14,28 +14,25 @@ package com.lucas.darkplayer;
  *        You should have received a copy of the GNU General Public License
  *        along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 import android.Manifest;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
-import android.preference.PreferenceManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.MediaStore;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SlidingPaneLayout;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -43,43 +40,44 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-import android.content.ContentUris;
-import android.net.Uri;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
-
-public class SongFragment extends Fragment{
-    RecyclerAdapter adapter;
+public class SongFragment extends Fragment implements Serializable {
+    public static int curr = 0;
     RecyclerView recyclerView;
-    private static SongFragment instance = null;
     SeekBar songStat;
+    static int[] shuffleList;
     boolean mBound = false;
-    public static int curr=0;
-    boolean completed=false;
-    ImageButton playPause, playPause2,shuffle,repeat;
-    ImageView shuffleOn,repeatOn;
-    boolean shuffled=false;
-    boolean loop=false;
-    boolean onResume=true;
+    //initialise variables
+    RecyclerAdapter adapter;
+    boolean perm;
+    boolean completed = false;
+    ImageButton playPause, playPause2, shuffle, repeat;
+    ImageView shuffleOn, repeatOn;
+    boolean shuffled = false;
+    boolean loop = false;
     static int songInList = 0;
-    static int shuffleList[];
-    static int defaultList[];
-    static TextView song,artist;
-    TextView seekCurr,seekEnd;
+    boolean onResume = true;
+    boolean changeOnShuffle;
+    TextView song, artist;
+    TextView seekCurr, seekEnd;
+    TextView noSongs, noSongs1;
     String playlistName;
-    boolean fromPlaylist=false;
+    boolean fromPlaylist = false;
     private SensorManager mSensorManager;
     private ShakeListener mSensorListener;
     private SlidingPaneLayout mLayout;
-    ImageView img,img2;
+    ImageView img, img2;
+    int previousSong = 0;
     private boolean sts;
     public static PlaybackStatus pStatus = PlaybackStatus.STOPPED;
     private PlayerService player;
@@ -109,8 +107,59 @@ public class SongFragment extends Fragment{
         super.onSaveInstanceState(savedInstanceState);
     }
 
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int duration = intent.getExtras().getInt("Duration");
+            int current = intent.getExtras().getInt("Current");
+            boolean playing = intent.getBooleanExtra("IsPlaying", false);
+            completed = intent.getBooleanExtra("Completed", false);
+            if (completed && !loop) {
+                completed = false;
+                nextSong();
+            } else if (completed && loop) {
+                //just decrement the index and call nextSong
+                //so the same song will be played
+                completed = false;
+                songInList--;
+                nextSong();
+            }
+            if (playing) {
+                pStatus = PlaybackStatus.PLAYING;
+                playPause.setImageResource(R.drawable.pause);
+                playPause2.setImageResource(R.drawable.pause);
+                pStatus = PlaybackStatus.PLAYING;
+                songStat.setMax(duration);
+                songStat.setProgress(current);
+                String time = String.format(Locale.ENGLISH, "%02d:%02d",
+                        TimeUnit.MILLISECONDS.toMinutes(duration),
+                        TimeUnit.MILLISECONDS.toSeconds(duration) -
+                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration))
+                );
+                String time1 = String.format(Locale.ENGLISH, "%02d:%02d",
+                        TimeUnit.MILLISECONDS.toMinutes(current),
+                        TimeUnit.MILLISECONDS.toSeconds(current) -
+                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(current))
+                );
+                seekCurr.setText(time1);
+                seekEnd.setText(time);
+
+            } else {
+                pStatus = PlaybackStatus.PAUSED;
+                playPause.setImageResource(R.drawable.play);
+                playPause2.setImageResource(R.drawable.play);
+            }
+
+        }
+    };
+
     @Override
     public void onDestroy() {
+        /*
+         * unbind service and stop player when
+         * Fragment is destroyed
+         */
         super.onDestroy();
         if (serviceBound) {
             getActivity().unbindService(serviceConnection);
@@ -118,75 +167,89 @@ public class SongFragment extends Fragment{
             player.stopSelf();
         }
     }
+
     @Override
     public void onDestroyView() {
+        /*
+         * This was meant for another feature where the session would be given to
+         * sharedpreferences onDestroy.
+         * It is a terrible way to do things but it's the most straightforward
+         * for now... As I have a terrible understanding of Android API's
+         * and the Fragment LifeCycle.
+         */
         super.onDestroyView();
         StoreData storage = new StoreData(getActivity().getApplicationContext());
         storage.storeAudioShuffleList(shuffleList);
-        }
+    }
+
     @Override
-    public void onCreate(Bundle savedInstanceState){
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
     }
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_main, container, false);
-        instance = this;
-        return view;
-    }
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         //get the arguments and values as early as possible
         Bundle arguments = getArguments();
         try {
             fromPlaylist = arguments.getBoolean("playlist");
             playlistName = arguments.getString("playlistName");
-        }catch(NullPointerException e){
+        } catch (NullPointerException e) {
             e.printStackTrace();
         }
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        StoreData storage = new StoreData(getActivity().getApplicationContext());
-        sts=prefs.getBoolean("sts",false);
-        if(!fromPlaylist) {
-            songInList = storage.loadAudioIndex();
-            shuffled = storage.loadShuffled();
-        }else{
-            songInList=0;
-        }
+        final StoreData storage = new StoreData(getActivity().getApplicationContext());
+        //set ID's for ui elements
+        sts = prefs.getBoolean("sts", false);
+        changeOnShuffle = prefs.getBoolean("changeOnShuffle", false);
         img = view.findViewById(R.id.albumArtBig);
         img2 = view.findViewById(R.id.albumArtTop);
         song = view.findViewById(R.id.title);
         artist = view.findViewById(R.id.artist);
         seekCurr = view.findViewById(R.id.seekTime);
+        recyclerView = view.findViewById(R.id.recyclerView);
         seekEnd = view.findViewById(R.id.seekEnd);
         shuffleOn = view.findViewById(R.id.shuffle_on);
         repeatOn = view.findViewById(R.id.loop_on);
         playPause = view.findViewById(R.id.button2);
         playPause2 = view.findViewById(R.id.button3);
+        noSongs = view.findViewById(R.id.no_songs);
+        noSongs1 = view.findViewById(R.id.no_songs1);
         final ImageButton prev = view.findViewById(R.id.button1);
         final ImageButton next = view.findViewById(R.id.button);
         repeat = view.findViewById(R.id.loop);
         shuffle = view.findViewById(R.id.shuffle);
+        /*
+         *
+         */
         if (shuffled) {
             shuffleOn.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             shuffleOn.setVisibility(View.GONE);
         }
         repeatOn.setVisibility(View.GONE);
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-
-        }
-        songStat=view.findViewById(R.id.seekBar);
-        songStat.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            public void onProgressChanged (SeekBar seekBar,
-                                           int progress,
-                                           boolean fromUser) {
+        try {
+            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                perm = false;
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            } else {
+                perm = true;
             }
+
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+        songStat = view.findViewById(R.id.seekBar);
+        songStat.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            public void onProgressChanged(SeekBar seekBar,
+                                          int progress,
+                                          boolean fromUser) {
+            }
+
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
             }
@@ -200,21 +263,21 @@ public class SongFragment extends Fragment{
         playPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setPlayerStatus(shuffleList[songInList],false);
+                setPlayerStatus(shuffleList[songInList], false);
             }
         });
 
         playPause2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setPlayerStatus(shuffleList[songInList],false);
+                setPlayerStatus(shuffleList[songInList], false);
             }
         });
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 nextSong();
-                }
+            }
         });
         prev.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -223,199 +286,211 @@ public class SongFragment extends Fragment{
             }
         });
         //Check if playing from playlist.
-        if(!fromPlaylist) {
-            //generate song data
-            audioList = findAudio();
-        }else{
-            new DatabaseAccess().execute();
-        }
-        //create shufflelist as a sequential array
-        //as we are not shuffled yet
-
-        if(!fromPlaylist && shuffled){
-            shuffleList=storage.loadShuffleList();
-        }else{
-            shuffleList = new int[audioList.size()];
-            for (int l = 0; l < audioList.size(); l++) {
-                shuffleList[l] = l;
-            }
-        }
-        repeat.setOnClickListener(new View.OnClickListener() {
+        new Thread(new Runnable() {
             @Override
-            public void onClick(View v) {
-                if(loop){
-                    loop=false;
-                    repeatOn.setVisibility(View.GONE);
-                }else{
-                    loop=true;
-                    repeatOn.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-        shuffle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(shuffled){
-                    songInList=shuffleList[songInList];
-                    for(int l=0; l<audioList.size(); l++){
-                        shuffleList[l] = l;
+            public void run() {
+                final ArrayList<SongData> a;
+                if (perm) {
+                    if (!fromPlaylist) {
+                        a = PlaylistDBController.findAudio(getActivity());
+                    } else {
+                        a = PlaylistDBController.getSongsFromPlaylist(getActivity(), playlistName);
                     }
-                    shuffled=false;
-                    shuffleOn.setVisibility(View.GONE);
-                }else{
-                    shuffleList = shuffle(shuffleList, audioList.size());
-                    setPlayerStatus(shuffleList[songInList], true);
-                    shuffleOn.setVisibility(View.VISIBLE);
+                } else {
+                    a = new ArrayList<>();
                 }
-                StoreData storage = new StoreData(getActivity().getApplicationContext());
-                storage.storeShuffled(shuffled);
-                storage.storeAudioShuffleList(shuffleList);
-            }
-        });
-        song.setText(audioList.get(shuffleList[songInList]).getTitle());
-        artist.setText(audioList.get(shuffleList[songInList]).getArtist());
-        mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
-        mSensorListener = new ShakeListener();
-        mSensorListener.setOnShakeListener(new ShakeListener.OnShakeListener() {
 
-            public void onShake() {
-                if(sts) {
-                    //check if shake to shuffle is enabled
-                    Toast.makeText(getActivity(), "Shuffling!", Toast.LENGTH_LONG).show();
-                    //shuffle when shaken
-                    shuffleList = shuffle(shuffleList, audioList.size());
-                    setPlayerStatus(shuffleList[songInList], true);
-                    StoreData storage = new StoreData(getActivity().getApplicationContext());
-                    storage.storeShuffled(shuffled);
-                    storage.storeAudioShuffleList(shuffleList);
-                }
-            }
-        });
-        recyclerView = view.findViewById(R.id.recyclerView);
-        recyclerView.setVisibility(View.VISIBLE);
-        recyclerView.addOnItemTouchListener(
-                new RecyclerItemClickListener(getActivity(), recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
-                    @Override public void onItemClick(View view, int position) {
-                        //store prev to update item so that playing button is shown
-                        int prev = shuffleList[songInList];
-                        if(indexOf(shuffleList, position) != -1)
-                            songInList = indexOf(shuffleList, position);
-                        adapter.notifyItemChanged(prev);
-                        setPlayerStatus(shuffleList[songInList],true);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        audioList = a;
+                        if (!getActivity().isFinishing()) {
+                            if (perm) {
+                                if (!fromPlaylist && shuffled) {
+                                    StoreData storage = new StoreData(getActivity().getApplicationContext());
+                                    shuffleList = storage.loadShuffleList();
+                                    if (shuffleList.length != audioList.size() - 1) {
+                                        shuffleList = new int[audioList.size()];
+                                        for (int l = 0; l < audioList.size(); l++) {
+                                            shuffleList[l] = l;
+                                        }
+                                    }
+                                } else {
+                                    shuffleList = new int[audioList.size()];
+                                    for (int l = 0; l < audioList.size(); l++) {
+                                        shuffleList[l] = l;
+                                    }
+                                }
+                                songInList = storage.loadAudioIndex();
+                                repeat.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        if (loop) {
+                                            loop = false;
+                                            repeatOn.setVisibility(View.GONE);
+                                        } else {
+                                            loop = true;
+                                            repeatOn.setVisibility(View.VISIBLE);
+                                        }
+                                    }
+                                });
+                                shuffle.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        if (shuffled) {
+                                            songInList = shuffleList[songInList];
+                                            shuffleList = new int[audioList.size()];
+                                            for (int l = 0; l < audioList.size() - 1; l++) {
+                                                shuffleList[l] = l;
+                                            }
+                                            shuffled = false;
+                                            shuffleOn.setVisibility(View.GONE);
+                                        } else {
+                                            previousSong = shuffleList[songInList];
+                                            shuffleList = shuffle(shuffleList, audioList.size());
+                                            if (changeOnShuffle) {
+                                                setPlayerStatus(shuffleList[songInList], true);
+                                            } else {
+                                                previousSong = shuffleList[songInList];
+                                                if (indexOf(shuffleList, previousSong) != -1) {
+                                                    songInList = indexOf(shuffleList, previousSong);
+                                                }
+                                            }
+                                            shuffleOn.setVisibility(View.VISIBLE);
+                                        }
+                                        StoreData storage = new StoreData(getActivity().getApplicationContext());
+                                        storage.storeShuffled(shuffled);
+                                        storage.storeAudioShuffleList(shuffleList);
+                                    }
+                                });
+                                song.setText(audioList.get(shuffleList[songInList]).getTitle());
+                                artist.setText(audioList.get(shuffleList[songInList]).getArtist());
+                                mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+                                mSensorListener = new ShakeListener();
+                                mSensorListener.setOnShakeListener(new ShakeListener.OnShakeListener() {
+
+                                    public void onShake() {
+                                        if (sts) {
+                                            //check if shake to shuffle is enabled
+                                            Toast.makeText(getActivity(), "Shuffling!", Toast.LENGTH_LONG).show();
+                                            //shuffle when shaken
+                                            previousSong = shuffleList[songInList];
+                                            shuffleList = shuffle(shuffleList, audioList.size());
+                                            if (changeOnShuffle) {
+                                                setPlayerStatus(shuffleList[songInList], true);
+                                            } else {
+                                                previousSong = shuffleList[songInList];
+                                                if (indexOf(shuffleList, previousSong) != -1) {
+                                                    songInList = indexOf(shuffleList, previousSong);
+                                                }
+                                            }
+                                            shuffleOn.setVisibility(View.VISIBLE);
+                                            StoreData storage = new StoreData(getActivity().getApplicationContext());
+                                            storage.storeShuffled(shuffled);
+                                            storage.storeAudioShuffleList(shuffleList);
+                                        }
+                                    }
+                                });
+                                recyclerView.addOnItemTouchListener(
+                                        new RecyclerItemClickListener(getActivity(), recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+                                            @Override
+                                            public void onItemClick(View view, int position) {
+                                                //store prev to update item so that playing button is shown
+                                                previousSong = shuffleList[songInList];
+                                                if (indexOf(shuffleList, position) != -1)
+                                                    songInList = indexOf(shuffleList, position);
+                                                setPlayerStatus(shuffleList[songInList], true);
+                                            }
+
+                                            @Override
+                                            public void onLongItemClick(View view, int position) {
+                                                // do whatever
+                                            }
+
+                                        })
+                                );
+                                recyclerView.setVisibility(View.VISIBLE);
+                                noSongs.setVisibility(View.GONE);
+                                noSongs1.setVisibility(View.GONE);
+                                adapter = new RecyclerAdapter(audioList, getActivity().getApplication());
+                                recyclerView.setAdapter(adapter);
+                                recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                                onSongChange();
+                            } else {
+                                recyclerView.setVisibility(View.GONE);
+                                noSongs.setVisibility(View.VISIBLE);
+                                noSongs1.setVisibility(View.VISIBLE);
+                            }
+                        }
                     }
+                });
+            }
+        }).run();
 
-                    @Override public void onLongItemClick(View view, int position) {
-                        // do whatever
-                    }
-
-                })
-        );
-        if(fromPlaylist) {
-            recyclerView.setVisibility(View.GONE);
-        }else {
-        adapter = new RecyclerAdapter(audioList, getActivity().getApplication());
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        onSongChange();
-        }
-
-
+        return view;
     }
-    public ArrayList<SongData> findAudio() {
-        ContentResolver contentResolver = getActivity().getContentResolver();
-        ArrayList<SongData> list = new ArrayList<>();
-        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        String selection = MediaStore.Audio.Media.IS_MUSIC;
-        String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
-        Cursor cursor = contentResolver.query(uri, null, selection, null, sortOrder);
 
-        if (cursor != null && cursor.getCount() > 0) {
-            while (cursor.moveToNext()) {
-                String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-                String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
-                String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
-                String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-                Long albumId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
-                Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
-                Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
-                list.add(new SongData(data, title, album, artist, albumArtUri));
-            }
-        }
-        cursor.close();
-        return list;
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
-    private int[] shuffle(int playlist[], int max){
+    private int[] shuffle(int[] playlist, int max) {
         //please run this function in seperate thread to avoid stalls
         shuffled = true;
         shuffleOn.setVisibility(View.VISIBLE);
         int temp;
         int rand;
-        for(int l=0; l<max-1; l++) {
-            rand = ThreadLocalRandom.current().nextInt(0, max-1);
+        for (int l = 0; l < max - 1; l++) {
+            rand = ThreadLocalRandom.current().nextInt(0, max - 1);
             temp = playlist[rand];
             playlist[rand] = playlist[l];
             playlist[l] = temp;
-            }
+        }
         songInList = 0;
         return playlist;
-        }
+    }
 
-    private int indexOf(int array[], int element){
-        for(int l=0; l<array.length; l++){
-            if(array[l]==element)
+    private int indexOf(int[] array, int element) {
+        for (int l = 0; l < array.length; l++) {
+            if (array[l] == element)
                 return l;
         }
         return -1;
     }
 
-    private void playAudio(String media, boolean reset){
+    private void playAudio(String media, boolean reset) {
         StoreData storage = new StoreData(getActivity().getApplicationContext());
-        if(!serviceBound){
-            Intent playerIntent=new Intent(getActivity(),PlayerService.class);
-            playerIntent.putExtra("media",media);
-            playerIntent.putExtra("reset",reset);
-            playerIntent.putExtra("pause",false);
+        if (!serviceBound) {
+            Intent playerIntent = new Intent(getActivity(), PlayerService.class);
+            playerIntent.putExtra("media", media);
+            playerIntent.putExtra("reset", reset);
+            playerIntent.putExtra("pause", false);
             onSongChange();
             getActivity().startService(playerIntent);
-            getActivity().bindService(playerIntent,serviceConnection,Context.BIND_AUTO_CREATE);
+            getActivity().bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         }
         storage.storeAudioIndex(songInList);
-        if(pStatus == PlaybackStatus.PLAYING){
+        if (pStatus == PlaybackStatus.PLAYING) {
             storage.storeSession(true);
-        }
-        else{
+        } else {
             storage.storeSession(false);
         }
         storage.storeAudioData(audioList);
 
     }
 
-    private void seekAudio(boolean seek)
-    {
-        Intent seekIntent= new Intent(getActivity(),PlayerService.class);
-        seekIntent.putExtra("seek",seek);
+    private void seekAudio(boolean seek) {
+        Intent seekIntent = new Intent(getActivity(), PlayerService.class);
+        seekIntent.putExtra("seek", seek);
         seekIntent.putExtra("seekTo", songStat.getProgress());
         getActivity().startService(seekIntent);
     }
 
-
     public void onSongChange() {
-        int prev=0;
-        int next=0;
-
-        try {
-            prev = shuffleList[songInList - 1];
-            next = shuffleList[songInList + 1];
-        }
-        catch(IndexOutOfBoundsException e) {
-            prev=0;
-            next=0;
-        }
-        if(adapter !=null) {
+        if (adapter != null) {
             adapter.notifyItemChanged(shuffleList[songInList]);
-            adapter.notifyItemChanged(prev);
-            adapter.notifyItemChanged(next);
+            adapter.notifyItemChanged(previousSong);
         }
         img.setImageURI(audioList.get(shuffleList[songInList]).getAlbumArt());
         img2.setImageURI(audioList.get(shuffleList[songInList]).getAlbumArt());
@@ -426,130 +501,83 @@ public class SongFragment extends Fragment{
     public void pauseResumeReset(boolean pause) {
         StoreData storage = new StoreData(getActivity().getApplicationContext());
         img.setImageURI(audioList.get(shuffleList[songInList]).getAlbumArt());
-        Intent pauseIntent=new Intent(getActivity(),PlayerService.class);
-        pauseIntent.putExtra("pause",pause);
+        Intent pauseIntent = new Intent(getActivity(), PlayerService.class);
+        pauseIntent.putExtra("pause", pause);
         getActivity().startService(pauseIntent);
-        if(pStatus == PlaybackStatus.PLAYING){
+        if (pStatus == PlaybackStatus.PLAYING) {
             storage.storeSession(true);
-        }else{
+        } else {
             storage.storeSession(false);
         }
     }
 
-    private void setPlayerStatus(int position, boolean skip){
+    private void setPlayerStatus(int position, boolean skip) {
         switch (pStatus) {
             case PAUSED:
-                if(skip){
+                if (skip) {
                     playAudio(audioList.get(position).getSongId(), true);
-                    pStatus = PlaybackStatus.PLAYING;
-                }else{
+                } else {
                     pauseResumeReset(true);
                 }
-                playPause.setImageResource(R.drawable.pause);
-                playPause2.setImageResource(R.drawable.pause);
                 break;
             case PLAYING:
-                if(skip){
+                if (skip) {
                     playAudio(audioList.get(position).getSongId(), true);
-                    pStatus = PlaybackStatus.PLAYING;
-                    playPause.setImageResource(R.drawable.pause);
-                    playPause2.setImageResource(R.drawable.pause);
-                }else{
+                } else {
                     pauseResumeReset(true);
-                    playPause.setImageResource(R.drawable.play);
-                    playPause2.setImageResource(R.drawable.play);
                 }
                 break;
             case STOPPED:
                 playAudio(audioList.get(position).getSongId(), false);
-                playPause.setImageResource(R.drawable.pause);
-                playPause2.setImageResource(R.drawable.pause);
-                pStatus = PlaybackStatus.PLAYING;
                 break;
         }
     }
 
-    public void nextSong(){
-        if(songInList < audioList.size()-1) {
+    public void nextSong() {
+        if (songInList < audioList.size() - 1) {
             //increment song when next is pressed
+            previousSong = shuffleList[songInList];
             songInList++;
             //use song in shuffle playlist
             //it is usually sequential unless shuffled
-            setPlayerStatus(shuffleList[songInList],true);
+            setPlayerStatus(shuffleList[songInList], true);
         }
     }
-    public void prevSong(){
-        if(songInList > 0) {
+
+    public void prevSong() {
+        if (songInList > 0) {
             //decrement song
+            previousSong = shuffleList[songInList];
             songInList--;
-            setPlayerStatus(shuffleList[songInList],true);
+            setPlayerStatus(shuffleList[songInList], true);
         }
     }
-
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int duration = intent.getExtras().getInt("Duration");
-            int current = intent.getExtras().getInt("Current");
-            boolean playing = intent.getBooleanExtra("IsPlaying", false);
-            completed = intent.getBooleanExtra("Completed",false);
-            if(completed && !loop){
-                completed=false;
-                nextSong();
-            }else if(completed && loop){
-                //just decrement the index and call nextSong
-                //so the same song will be played
-                completed=false;
-                songInList--;
-                nextSong();
-            }
-            if(playing){
-                pStatus = PlaybackStatus.PLAYING;
-                playPause.setImageResource(R.drawable.pause);
-                playPause2.setImageResource(R.drawable.pause);
-                pStatus = PlaybackStatus.PLAYING;songStat.setMax(duration);
-                songStat.setProgress(current);
-                String time = String.format(Locale.ENGLISH,"%02d:%02d",
-                        TimeUnit.MILLISECONDS.toMinutes(duration),
-                        TimeUnit.MILLISECONDS.toSeconds(duration) -
-                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration))
-                );
-                String time1 = String.format(Locale.ENGLISH,"%02d:%02d",
-                        TimeUnit.MILLISECONDS.toMinutes(current),
-                        TimeUnit.MILLISECONDS.toSeconds(current) -
-                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(current))
-                );
-                seekCurr.setText(time1);
-                seekEnd.setText(time);
-
-            }
-
-        }
-    };
-
 
     @Override
     public void onResume() {
         super.onResume();
-        mSensorManager.registerListener(mSensorListener,
-                mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                SensorManager.SENSOR_DELAY_UI);
-        getActivity().registerReceiver(receiver, new IntentFilter("seekto"));
+        if (perm) {
+            mSensorManager.registerListener(mSensorListener,
+                    mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                    SensorManager.SENSOR_DELAY_UI);
+            getActivity().registerReceiver(receiver, new IntentFilter("seekto"));
+        }
     }
 
     @Override
     public void onPause() {
-        mSensorManager.unregisterListener(mSensorListener);
-        getActivity().unregisterReceiver(receiver);
+        if (perm) {
+            mSensorManager.unregisterListener(mSensorListener);
+            getActivity().unregisterReceiver(receiver);
+        }
         super.onPause();
     }
 
     @Override
-    public void onStart(){
+    public void onStart() {
         super.onStart();
         Intent intent = new Intent(getActivity(), PlayerService.class);
-        getActivity().bindService(intent,serviceConnection,Context.BIND_AUTO_CREATE);
+        getActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -559,36 +587,4 @@ public class SongFragment extends Fragment{
         mBound = false;
     }
 
-    public static SongFragment getInstance() {
-        return instance;
-    }
-
-    private class DatabaseAccess extends AsyncTask<SongData, Void, ArrayList<SongData>>{
-        /* we will use AsyncTask for database queries to reduce lag.
-         */
-
-        @Override
-        protected ArrayList<SongData> doInBackground(SongData...data){
-            ArrayList<SongData> songs = new ArrayList<>();
-            songs = db.getSongsFromPlaylist(getActivity(), playlistName);
-            return songs;
-        }
-        @Override
-        protected void onPreExecute(){
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<SongData> data){
-            super.onPostExecute(data);
-            audioList = data;
-            adapter = new RecyclerAdapter(audioList, getActivity().getApplication());
-            recyclerView.setAdapter(adapter);
-            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-            recyclerView.setVisibility(View.VISIBLE);
-            onSongChange();
-
-        }
-    }
-
-    }
+}

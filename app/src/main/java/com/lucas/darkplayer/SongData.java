@@ -13,20 +13,19 @@ package com.lucas.darkplayer;
 
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <https://www.gnu.org/licenses/>. */
-import android.media.session.MediaSessionManager;
 import android.net.Uri;
 
 import java.io.Serializable;
 
 public class SongData implements Serializable {
-    private final Uri albumArt;
+    private String albumArt;
     private String songId;
     private String title;
     private String album;
     private String artist;
     //private Uri songUrl;
 
-    public SongData(String songId, String title, String album, String artist,  Uri albumArt){
+    public SongData(String songId, String title, String album, String artist, String albumArt) {
         this.songId = songId;
         this.title = title;
         this.album = album;
@@ -60,7 +59,7 @@ public class SongData implements Serializable {
     }
 
     public Uri getAlbumArt() {
-        return albumArt;
+        return Uri.parse(albumArt);
     }
 
 }

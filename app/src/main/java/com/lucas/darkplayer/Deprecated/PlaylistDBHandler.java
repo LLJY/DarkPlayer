@@ -14,11 +14,12 @@ package com.lucas.darkplayer.Deprecated;
  *        You should have received a copy of the GNU General Public License
  *        along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.content.Context;
-import android.content.ContentValues;
-import android.database.Cursor;
 import android.net.Uri;
 
 import com.lucas.darkplayer.PlaylistData;
@@ -86,7 +87,7 @@ public class PlaylistDBHandler extends SQLiteOpenHelper {
             String title = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
             String album = cursor.getString(cursor.getColumnIndex(KEY_ALBUM));
             String artist = cursor.getString(cursor.getColumnIndex(KEY_ARTIST));
-            Uri albumArtUri = Uri.parse(cursor.getString(cursor.getColumnIndex(KEY_ALBUMART)));
+            String albumArtUri = cursor.getString(cursor.getColumnIndex(KEY_ALBUMART));
             audioList.add(new SongData(data, title, album, artist, albumArtUri));
         }
         return audioList;
@@ -102,7 +103,7 @@ public class PlaylistDBHandler extends SQLiteOpenHelper {
             String title = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
             String album = cursor.getString(cursor.getColumnIndex(KEY_ALBUM));
             String artist = cursor.getString(cursor.getColumnIndex(KEY_ARTIST));
-            Uri albumArtUri = Uri.parse(cursor.getString(cursor.getColumnIndex(KEY_ALBUMART)));
+            String albumArtUri = cursor.getString(cursor.getColumnIndex(KEY_ALBUMART));
             audioList.add(new SongData(data, title, album, artist, albumArtUri));
         }
         return audioList;

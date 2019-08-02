@@ -14,17 +14,18 @@ package com.lucas.darkplayer;
  *        You should have received a copy of the GNU General Public License
  *        along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-        import android.os.Bundle;
-        import android.support.v7.app.AppCompatActivity;
-        import android.support.v7.widget.LinearLayoutManager;
-        import android.support.v7.widget.RecyclerView;
-        import android.view.View;
-        import android.widget.Button;
-        import android.widget.EditText;
-        import android.widget.Toast;
 
-        import java.util.ArrayList;
-        import java.util.List;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CreatePlaylistActivity extends AppCompatActivity {
     Button addPlaylist;
@@ -32,6 +33,7 @@ public class CreatePlaylistActivity extends AppCompatActivity {
     List<SongData> data;
     CreatePlaylistRecyclerAdapter adapter;
     PlaylistDB db;
+    PlaylistDBController dbc;
     PlaylistFragment pF;
     SongFragment main;
     EditText playlistName;
@@ -40,7 +42,7 @@ public class CreatePlaylistActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.create_playlist);
-        data = main.getInstance().findAudio();
+        data = PlaylistDBController.findAudio(this);
         db = PlaylistDB.getInstance(this);
         try {
             pF = new PlaylistFragment();
@@ -94,6 +96,12 @@ public class CreatePlaylistActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        added.clear();
+        finish();
     }
 }
 

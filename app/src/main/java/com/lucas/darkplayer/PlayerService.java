@@ -14,25 +14,37 @@ package com.lucas.darkplayer;
  *        You should have received a copy of the GNU General Public License
  *        along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import java.io.IOException;
-
-import android.media.AudioManager;
-import android.os.Binder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import java.io.IOException;
+import java.io.Serializable;
+
 public class PlayerService extends Service implements MediaPlayer.OnCompletionListener,
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
-        MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener,
+        MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener, Serializable,
 
         AudioManager.OnAudioFocusChangeListener {
+    /*
+     * This is a service that handles playing music.
+     * The original idea was to start this as a foreground service
+     * and couple it with NotificationCompat.
+     * But refactoring such that PlayerService handles
+     * Play, Pause, Resume, Shuffle, Loop. Proved to be a
+     * pain in the ass and it broke the app quite badly.
+     * For now, we will settle for SongFragment controlling PlayerService.
+     */
+    //initialise variables
     public MediaPlayer mediaPlayer;
     private boolean ongoingCall = false;
     private PhoneStateListener phoneStateListener;
@@ -41,6 +53,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private AudioManager audioManager;
     private int resumePosition;
     int seekTo=0;
+    int index = 0;
     Boolean seek=false;
     Intent localintent = new Intent("seekto");
     private Handler mHandler = new Handler();
@@ -51,6 +64,9 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     }
 
     private void initMediaPlayer() {
+        /*
+         * Initialises MediaPlayer and calls preparedAsync
+         */
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setOnErrorListener(this);
         mediaPlayer.setOnPreparedListener(this);
@@ -100,6 +116,9 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             resumePosition = mediaPlayer.getCurrentPosition();
+            localintent.putExtra("IsPlaying", mediaPlayer.isPlaying());
+            sendBroadcast(localintent);
+
         }
     }
     public void resumePlayer() {
@@ -155,6 +174,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
 
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
+        //send intent over to SongFragment to tell it that song has completed
         localintent.putExtra("Completed", true);
         sendBroadcast(localintent);
 
@@ -176,6 +196,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
 
     @Override
     public void onPrepared(MediaPlayer mediaPlayer) {
+        //Start playing when it's prepared
         startPlaying();
 
     }
@@ -207,8 +228,8 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             case MediaPlayer.MEDIA_INFO_AUDIO_NOT_PLAYING:
                 Log.d("MediaPlayer Error", "ERROR: MEDIA AUDIO NOT PLAYING" + u);
                 return true;
-            }
-            return true;
+        }
+        return true;
     }
 
     @Override
@@ -232,12 +253,9 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private boolean requestAudioFocus() {
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            //Focus gained
-            return true;
-        }
+        //Focus gained
+        return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
         //Could not gain focus
-        return false;
     }
 
     private boolean removeAudioFocus() {
@@ -251,13 +269,41 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         }
     }
 
+    private void next() {
+        //unimplemented, will change in the future so that
+        //service controls previous and next
+        //the reason why I didn't do this from the start is because it requires some
+        //major refactoring.
+        if (SongFragment.songInList < SongFragment.audioList.size()) {
+            SongFragment.songInList++;
+            localintent.putExtra("next", true);
+            sendBroadcast(localintent);
+        }
+    }
+
+    private void prev() {
+        //unimplemented, will change in the future so that
+        //service controls previous and next
+        //the reason why I didn't do this from the start is because it requires some
+        //major refactoring.
+        if (SongFragment.songInList > 0) {
+            SongFragment.songInList--;
+            localintent.putExtra("prev", true);
+            sendBroadcast(localintent);
+        }
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-            boolean reset = intent.getExtras().getBoolean("reset",false);
-            boolean pause = intent.getExtras().getBoolean("pause",false);
-            seek = intent.getExtras().getBoolean("seek",false);
-            seekTo = intent.getExtras().getInt("seekTo",0);
+        //getting intents from SongFragment to tell PlayerService what to do.
+        boolean reset = intent.getExtras().getBoolean("reset", false);
+        boolean pause = intent.getExtras().getBoolean("pause", false);
+        seek = intent.getExtras().getBoolean("seek", false);
+        seekTo = intent.getExtras().getInt("seekTo", 0);
         if (pause) {
+            /*
+             * pause intent tells the player to pause/resume depending on circumstance
+             */
             pause = false;
             switch (SongFragment.pStatus) {
                 case PAUSED:
@@ -271,13 +317,18 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             }
         }
         if (reset) {
-            reset = false;
+            /*
+             * Reset player to prepare to play new music
+             */
             stopPlaying();
             mediaPlayer.reset();
             initMediaPlayer();
         }
 
         if(seek){
+            /*
+             * seek when SongFragment sends seekIntent
+             */
             if(mediaPlayer!= null) {
                 if (mediaPlayer.isPlaying()) {
                     mediaPlayer.seekTo(seekTo);

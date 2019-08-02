@@ -3,26 +3,35 @@
     android:layout_height="match_parent"
     android:background="#121212"
     android:layout_width="match_parent">
+    <PreferenceCategory android:title="Player Settings">
 
-    <SwitchPreferenceCompat
-        android:id="@+id/shake"
-        android:key="sts"
-        android:textColor="@android:color/white"
-        app:title="Shake To Shuffle"
-        android:summary="Shake Device to Shuffle Music!!"/>
+        <SwitchPreferenceCompat
+            android:key="sts"
+            android:summary="Shake device to shuffle music!!"
+            app:title="Shake to shuffle" />
 
-    <Preference
-        android:id="@+id/eq"
-        android:key="Equalizer"
-        android:textColor="@android:color/white"
-        android:summary="Launches System Equalizer"
-        app:title="Equalizer" />
+        <SwitchPreferenceCompat
+            android:key="changeOnShuffle"
+            android:summary="Changes the song when shuffle is activated"
+            app:title="Change song when shuffled" />
 
-    <Preference
-        android:key="feedback"
-        android:textColor="@android:color/white"
-        android:summary="Report technical issues or suggest new features"
-        app:title="Send feedback" />
+        <Preference
+            android:key="Equalizer"
+            android:summary="Launches System Equalizer"
+            app:title="Equalizer" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Miscellaneous Settings">
+        <Preference
+            android:key="feedback"
+            android:summary="Report technical issues or suggest new features"
+            app:title="Send feedback" />
+
+        <Preference
+            android:key="reset"
+            android:summary="Deletes All Playlists"
+            app:title="Reset Playlist" />
+    </PreferenceCategory>
 
 
 </PreferenceScreen>

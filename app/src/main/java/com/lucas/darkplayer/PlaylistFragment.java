@@ -15,10 +15,10 @@ package com.lucas.darkplayer;
  *        along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -30,40 +30,46 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 public class PlaylistFragment extends Fragment {
+    //initialise variables
     Button newPlaylist;
     ArrayList<PlaylistData> playlists = new ArrayList<>();
     PlaylistRecyclerAdapter adapter;
     PlaylistDBController db;
     SwipeRefreshLayout srl;
     RecyclerView recyclerView;
+    TextView noPlaylistsText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.playlist_layout, container, false);
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
         newPlaylist = view.findViewById(R.id.add_playlist);
         srl = view.findViewById(R.id.srl);
         recyclerView = view.findViewById(R.id.playlistrecycler);
-        new DatabaseAccess().execute();
-        recyclerView.setVisibility(View.GONE);
+        noPlaylistsText = view.findViewById(R.id.no_songs_playlist);
+        //We are starting, updateData so dataset(playlists) is not null
+        updateData();
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity != null) {
+            activity.getSupportActionBar().show();
+        }
         recyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(getActivity(), recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
+                        //starts fragment to start playlist screen
                         String title = ((TextView) recyclerView.findViewHolderForAdapterPosition(position).itemView.findViewById(R.id.playlist_name)).getText().toString();
                         Intent intent = new Intent(getActivity(), PlaylistPlayerActivity.class);
                         intent.putExtra("playlistName", title);
                         startActivity(intent);
-                        //start Activity to hold new fragment to avoid
-                        //fragment in fragment weirdness
+                        /*
+                         * start Activity to hold new fragment to avoid
+                         * fragment in fragment weirdness
+                         */
                     }
 
                     @Override
                     public void onLongItemClick(View view, int position) {
+                        //launch dialog for user delete confirmation.
                         String title = ((TextView) recyclerView.findViewHolderForAdapterPosition(position).itemView.findViewById(R.id.playlist_name)).getText().toString();
                         Bundle bundle = new Bundle();
                         bundle.putString("playlistName", title);
@@ -76,47 +82,89 @@ public class PlaylistFragment extends Fragment {
                 })
         );
         newPlaylist.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Intent intent = new Intent(getActivity(), CreatePlaylistActivity.class);
-            startActivity(intent);
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), CreatePlaylistActivity.class);
+                startActivity(intent);
             }
         });
         srl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                new DatabaseAccess().execute();
+                updateData();
             }
         });
+        return view;
     }
-    private class DatabaseAccess extends AsyncTask<PlaylistData, Void, ArrayList<PlaylistData>> {
-        /* we will use AsyncTask for database queries to reduce lag.
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        /*
+         * When fragment restarts, update recyclerview
+         * so that user does not have to manually refresh
+         * +1 for user experience
          */
 
-        @Override
-        protected ArrayList<PlaylistData> doInBackground(PlaylistData...data){
-            ArrayList<PlaylistData> playlist = new ArrayList<>();
-            playlist=db.getPlaylists(getActivity());
-            return playlist;
-        }
-        @Override
-        protected void onPreExecute(){
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<PlaylistData> data){
-            super.onPostExecute(data);
-            playlists=data;
-            if(!data.isEmpty()) {
-                adapter = new PlaylistRecyclerAdapter(data, getActivity().getApplication());
-                recyclerView.setAdapter(adapter);
-                recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                recyclerView.setVisibility(View.VISIBLE);
-                srl.setRefreshing(false);
-            }
-
-        }
+        updateData();
     }
 
+    private void updateData() {
+        /*
+         * This function is responsible for updating data
+         * by querying the database for data in a seperate thread.
+         * then updating recyclerview to show the new data.
+         * In my case, notifydatasetchanged does not work, hence
+         * I am redefining adapter.
+         */
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                /*
+                 * run database queries in a seperate tread
+                 * to avoid stalling the ui thread
+                 */
+                final ArrayList<PlaylistData> playlist = PlaylistDBController.getPlaylists(getActivity());
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!getActivity().isFinishing()) {
+                            /*
+                             * Now that db query has completed we can go ahead and initialise the rest
+                             * of the user interface.
+                             */
+                            playlists = playlist;
+                            if (!playlist.isEmpty()) {
+                                /*
+                                 * If playlist is not empty initialise the app as usual.
+                                 * Otherwise, set recyclerview to not be visible to avoid crashes
+                                 * also set textview warning to visible so that it shows up when
+                                 * no playlists are available
+                                 */
+                                adapter = new PlaylistRecyclerAdapter(playlist, getActivity().getApplication());
+                                recyclerView.setAdapter(adapter);
+                                recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                                recyclerView.setVisibility(View.VISIBLE);
+                                noPlaylistsText.setVisibility(View.GONE);
+                                srl.setRefreshing(false);
+                            } else {
+                                /*
+                                 * Set no Playlists warning
+                                 */
+                                recyclerView.setVisibility(View.GONE);
+                                noPlaylistsText.setVisibility(View.VISIBLE);
+                                srl.setRefreshing(false);
+                            }
+                        }
+                    }
+                });
+            }
+        }).run();
+    }
 }
+
