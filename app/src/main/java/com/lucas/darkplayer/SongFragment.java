@@ -292,8 +292,10 @@ public class SongFragment extends Fragment implements Serializable {
                 final ArrayList<SongData> a;
                 if (perm) {
                     if (!fromPlaylist) {
+                        songInList = storage.loadAudioIndex();
                         a = PlaylistDBController.findAudio(getActivity());
                     } else {
+                        songInList=0;
                         a = PlaylistDBController.getSongsFromPlaylist(getActivity(), playlistName);
                     }
                 } else {
@@ -321,7 +323,6 @@ public class SongFragment extends Fragment implements Serializable {
                                         shuffleList[l] = l;
                                     }
                                 }
-                                songInList = storage.loadAudioIndex();
                                 repeat.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
