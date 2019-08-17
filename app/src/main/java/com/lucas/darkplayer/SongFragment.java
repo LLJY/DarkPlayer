@@ -52,7 +52,6 @@ import java.util.concurrent.TimeUnit;
 
 
 public class SongFragment extends Fragment implements Serializable {
-    public static int curr = 0;
     RecyclerView recyclerView;
     SeekBar songStat;
     static int[] shuffleList;
@@ -66,7 +65,6 @@ public class SongFragment extends Fragment implements Serializable {
     boolean shuffled = false;
     boolean loop = false;
     static int songInList = 0;
-    boolean onResume = true;
     boolean changeOnShuffle;
     TextView song, artist;
     TextView seekCurr, seekEnd;
@@ -99,13 +97,6 @@ public class SongFragment extends Fragment implements Serializable {
         }
 
     };
-
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putBoolean("ServiceState", serviceBound);
-        super.onSaveInstanceState(savedInstanceState);
-    }
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
 
@@ -178,8 +169,6 @@ public class SongFragment extends Fragment implements Serializable {
          * and the Fragment LifeCycle.
          */
         super.onDestroyView();
-        StoreData storage = new StoreData(getActivity().getApplicationContext());
-        storage.storeAudioShuffleList(shuffleList);
     }
 
     @Override
@@ -190,6 +179,7 @@ public class SongFragment extends Fragment implements Serializable {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        final Bundle sState = savedInstanceState;
         View view = inflater.inflate(R.layout.activity_main, container, false);
         //get the arguments and values as early as possible
         Bundle arguments = getArguments();
@@ -306,24 +296,30 @@ public class SongFragment extends Fragment implements Serializable {
                         audioList = a;
                         if (!getActivity().isFinishing()) {
                             if (perm) {
-                                if (!fromPlaylist && shuffled) {
-                                    StoreData storage = new StoreData(getActivity().getApplicationContext());
-                                    shuffleList = storage.loadShuffleList();
-                                    if (shuffleList.length != audioList.size() - 1) {
+                                if (fromPlaylist) {
+                                    shuffleList = new int[audioList.size()];
+                                    for (int l = 0; l < audioList.size() - 1; l++) {
+                                        shuffleList[l] = l;
+                                    }
+                                }else {
+                                    try {
+                                        if (sState.getBoolean("shuffled")) {
+                                            int testList[] = sState.getIntArray("shuffleList");
+                                            if (testList.length == audioList.size()) {
+                                                shuffleList = testList;
+                                                shuffled = true;
+                                            } else {
+                                                shuffled = false;
+                                            }
+                                            songInList = sState.getInt("index");
+                                        }
+                                    } catch (NullPointerException e) {
+                                        e.printStackTrace();
                                         shuffleList = new int[audioList.size()];
-                                        for (int l = 0; l < audioList.size(); l++) {
+                                        for (int l = 0; l < audioList.size() - 1; l++) {
                                             shuffleList[l] = l;
                                         }
                                     }
-                                } else {
-                                    shuffleList = new int[audioList.size()];
-                                    for (int l = 0; l < audioList.size(); l++) {
-                                        shuffleList[l] = l;
-                                    }
-                                }
-                                songInList = storage.loadAudioIndex();
-                                if(songInList == -1){
-                                    songInList=0;
                                 }
                                 repeat.setOnClickListener(new View.OnClickListener() {
                                     @Override
@@ -361,9 +357,6 @@ public class SongFragment extends Fragment implements Serializable {
                                             }
                                             shuffleOn.setVisibility(View.VISIBLE);
                                         }
-                                        StoreData storage = new StoreData(getActivity().getApplicationContext());
-                                        storage.storeShuffled(shuffled);
-                                        storage.storeAudioShuffleList(shuffleList);
                                     }
                                 });
                                 song.setText(audioList.get(shuffleList[songInList]).getTitle());
@@ -388,9 +381,6 @@ public class SongFragment extends Fragment implements Serializable {
                                                 }
                                             }
                                             shuffleOn.setVisibility(View.VISIBLE);
-                                            StoreData storage = new StoreData(getActivity().getApplicationContext());
-                                            storage.storeShuffled(shuffled);
-                                            storage.storeAudioShuffleList(shuffleList);
                                         }
                                     }
                                 });
@@ -434,9 +424,22 @@ public class SongFragment extends Fragment implements Serializable {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(!fromPlaylist) {
+            outState.putIntArray("shuffleList", shuffleList);
+            outState.putBoolean("shuffled", shuffled);
+            outState.putInt("index", songInList);
+            outState.putBoolean("ServiceState", serviceBound);
+        }
+
+    }
+
+    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
+
 
     private int[] shuffle(int[] playlist, int max) {
         //please run this function in seperate thread to avoid stalls
@@ -483,16 +486,8 @@ public class SongFragment extends Fragment implements Serializable {
         if(reset){
             player.reset();
         }
-        StoreData storage = new StoreData(getActivity().getApplicationContext());
         onSongChange();
         getActivity().startService(playerIntent);
-        storage.storeAudioIndex(songInList);
-        if (pStatus == PlaybackStatus.PLAYING) {
-            storage.storeSession(true);
-        } else {
-            storage.storeSession(false);
-        }
-        storage.storeAudioData(audioList);
 
     }
 
