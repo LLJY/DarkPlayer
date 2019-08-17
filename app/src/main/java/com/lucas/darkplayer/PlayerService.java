@@ -16,11 +16,14 @@ package com.lucas.darkplayer;
  */
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
@@ -29,6 +32,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class PlayerService extends Service implements MediaPlayer.OnCompletionListener,
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
@@ -55,11 +59,25 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private String mediaFile;
     private AudioManager audioManager;
     private int resumePosition;
+    private ArrayList<SongData> audioList;
     int seekTo=0;
     int index = 0;
     Boolean seek=false;
     Intent localintent = new Intent("seekto");
     private Handler mHandler = new Handler();
+    BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean updateIndex=intent.getBooleanExtra("updateIndex",false);
+            if(updateIndex){
+                index = intent.getIntExtra("index",0);
+                reset();
+                mediaFile=audioList.get(index).getSongId();
+                initMediaPlayer();
+            }
+
+        }
+    };
     private void initMediaPlayer() {
         /*
          * Initialises MediaPlayer and calls preparedAsync
@@ -92,6 +110,8 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private void startPlaying() {
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
+            localintent.putExtra("index", index);
+            sendBroadcast(localintent);
             if(seek){
                 seek=false;
                 mediaPlayer.seekTo(seekTo);
@@ -266,27 +286,21 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         }
     }
 
-    private void next() {
-        //unimplemented, will change in the future so that
-        //service controls previous and next
-        //the reason why I didn't do this from the start is because it requires some
-        //major refactoring.
-        if (SongFragment.songInList < SongFragment.audioList.size()) {
-            SongFragment.songInList++;
-            localintent.putExtra("next", true);
-            sendBroadcast(localintent);
+    public void next() {
+        if(index<audioList.size()-1) {
+            index++;
+            mediaFile = audioList.get(index).getSongId();
+            reset();
+            initMediaPlayer();
         }
     }
 
-    private void prev() {
-        //unimplemented, will change in the future so that
-        //service controls previous and next
-        //the reason why I didn't do this from the start is because it requires some
-        //major refactoring.
-        if (SongFragment.songInList > 0) {
-            SongFragment.songInList--;
-            localintent.putExtra("prev", true);
-            sendBroadcast(localintent);
+    public void prev() {
+        if(index>=0) {
+            index--;
+            mediaFile = audioList.get(index).getSongId();
+            reset();
+            initMediaPlayer();
         }
     }
 
@@ -298,26 +312,19 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //getting intents from SongFragment to tell PlayerService what to do.
-        boolean reset = intent.getExtras().getBoolean("reset", false);
-        boolean pause = intent.getExtras().getBoolean("pause", false);
-        seek = intent.getExtras().getBoolean("seek", false);
-        seekTo = intent.getExtras().getInt("seekTo", 0);
-        if (pause) {
-            /*
-             * pause intent tells the player to pause/resume depending on circumstance
-             */
-            pause = false;
-            switch (SongFragment.pStatus) {
-                case PAUSED:
-                    resumePlayer();
-                    SongFragment.pStatus = PlaybackStatus.PLAYING;
-                    break;
-                case PLAYING:
-                    pausePlayer();
-                    SongFragment.pStatus = PlaybackStatus.PAUSED;
-                    break;
-            }
+        Bundle bundle = intent.getBundleExtra("bundle");
+        ArrayList<SongData> testList = (ArrayList<SongData>) bundle.getSerializable("audioList");
+        boolean updateIndex = intent.getBooleanExtra("updateIndex",false);
+        if(testList != null){
+            audioList=testList;
         }
+        if(updateIndex){
+            index = intent.getIntExtra("index", 0);
+        }
+        seek = intent.getBooleanExtra("seek", false);
+        seekTo = intent.getIntExtra("seekTo", 0);
+        IntentFilter filter = new IntentFilter("player");
+        registerReceiver(receiver, filter);
 
         if(seek){
             /*
@@ -333,7 +340,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
 
         try {
             //An audio file is passed to the service through putExtra();
-            mediaFile = intent.getExtras().getString("media");
+            mediaFile = audioList.get(index).getSongId();
         } catch (NullPointerException e) {
             stopSelf();
         }
@@ -357,6 +364,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             mediaPlayer.release();
         }
         removeAudioFocus();
+        unregisterReceiver(receiver);
     }
 
     //LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(PlayerService.this);

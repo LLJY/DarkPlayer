@@ -81,7 +81,6 @@ public class SongFragment extends Fragment implements Serializable {
     private PlayerService player;
     boolean serviceBound = false;
     static ArrayList<SongData> audioList;
-    PlaylistDBController db;
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -103,9 +102,14 @@ public class SongFragment extends Fragment implements Serializable {
         @Override
         public void onReceive(Context context, Intent intent) {
             int duration = intent.getExtras().getInt("Duration");
+            int index = intent.getIntExtra("index",0);
             int current = intent.getExtras().getInt("Current");
             boolean playing = intent.getBooleanExtra("IsPlaying", false);
             completed = intent.getBooleanExtra("Completed", false);
+            if(index != songInList && index != 0){
+                songInList=index;
+                onSongChange();
+            }
             if (completed && !loop) {
                 completed = false;
                 nextSong();
@@ -465,29 +469,28 @@ public class SongFragment extends Fragment implements Serializable {
         return -1;
     }
 
-    private void startService(ArrayList<SongData> audioList){
+    private void startService(ArrayList<SongData> audioList, int index){
         Bundle bundle = new Bundle();
-        bundle.putSerializable("audiolist", audioList);
+        bundle.putSerializable("audioList", audioList);
         Intent startIntent = new Intent(getActivity(), PlayerService.class);
         startIntent.putExtra("bundle", bundle);
+        startIntent.putExtra("updateIndex", true);
+        startIntent.putExtra("index", index);
+        getActivity().startService(startIntent);
         if(!serviceBound) {
-            getActivity().startService(startIntent);
             getActivity().bindService(startIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        }else{
-            getActivity().startService(startIntent);
         }
 
     }
 
-    private void playAudio(String media, boolean reset) {
-        Intent playerIntent = new Intent(getActivity(), PlayerService.class);
-        playerIntent.putExtra("media", media);
-        playerIntent.putExtra("pause", false);
+    private void playAudio(boolean reset) {
+        Intent playerIntent = new Intent("player");
         if(reset){
-            player.reset();
+            playerIntent.putExtra("index", shuffleList[songInList]);
+            playerIntent.putExtra("updateIndex", true);
         }
         onSongChange();
-        getActivity().startService(playerIntent);
+        getActivity().sendBroadcast(playerIntent);
 
     }
 
@@ -513,7 +516,7 @@ public class SongFragment extends Fragment implements Serializable {
         switch (pStatus) {
             case PAUSED:
                 if (skip) {
-                    playAudio(audioList.get(position).getSongId(), true);
+                    playAudio(true);
                 } else {
                     player.resumePlayer();
                 }
@@ -521,35 +524,23 @@ public class SongFragment extends Fragment implements Serializable {
             case PLAYING:
                 if (skip) {
                     player.reset();
-                    playAudio(audioList.get(position).getSongId(), true);
+                    playAudio(true);
                 } else {
                     player.pausePlayer();
                 }
                 break;
             case STOPPED:
-                playAudio(audioList.get(position).getSongId(), false);
+                startService(audioList, songInList);
                 break;
         }
     }
 
     public void nextSong() {
-        if (songInList < audioList.size() - 1) {
-            //increment song when next is pressed
-            previousSong = shuffleList[songInList];
-            songInList++;
-            //use song in shuffle playlist
-            //it is usually sequential unless shuffled
-            setPlayerStatus(shuffleList[songInList], true);
+            player.next();
         }
-    }
 
     public void prevSong() {
-        if (songInList > 0) {
-            //decrement song
-            previousSong = shuffleList[songInList];
-            songInList--;
-            setPlayerStatus(shuffleList[songInList], true);
-        }
+        player.prev();
     }
 
     @Override
