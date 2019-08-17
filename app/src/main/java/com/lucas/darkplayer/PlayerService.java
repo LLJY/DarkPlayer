@@ -58,6 +58,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private TelephonyManager telephonyManager;
     private String mediaFile;
     private AudioManager audioManager;
+    private PlaybackStatus pStatus = PlaybackStatus.STOPPED;
     private int resumePosition;
     private ArrayList<SongData> audioList;
     int seekTo=0;
@@ -111,15 +112,12 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
             localintent.putExtra("index", index);
+            localintent.putExtra("updateIndex", true);
             sendBroadcast(localintent);
+            updatePlayerStatus(PlaybackStatus.PLAYING);
             if(seek){
                 seek=false;
                 mediaPlayer.seekTo(seekTo);
-            }
-            try{
-                t.start();
-            }catch(IllegalThreadStateException e){
-                e.printStackTrace();
             }
             mediaPlayer.setVolume(1.0f, 1.0f);
         }
@@ -127,14 +125,14 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     public void stopPlaying() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
+            updatePlayerStatus(PlaybackStatus.STOPPED);
         }
     }
     public void pausePlayer() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             resumePosition = mediaPlayer.getCurrentPosition();
-            localintent.putExtra("IsPlaying", mediaPlayer.isPlaying());
-            sendBroadcast(localintent);
+            updatePlayerStatus(PlaybackStatus.PAUSED);
 
         }
     }
@@ -148,11 +146,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             }
             mediaPlayer.setVolume(1.0f, 1.0f);
             mediaPlayer.start();
-            try{
-                t.start();
-            }catch(IllegalThreadStateException e){
-                e.printStackTrace();
-            }
+            updatePlayerStatus(PlaybackStatus.PLAYING);
         }
     }
     private void callStateListener() {
@@ -182,6 +176,12 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         };
         telephonyManager.listen(phoneStateListener,
                 PhoneStateListener.LISTEN_CALL_STATE);
+    }
+    private void updatePlayerStatus(PlaybackStatus pStatus){
+        localintent.putExtra("pStatus",pStatus);
+        localintent.putExtra("updatePlayerStatus", true);
+        sendBroadcast(localintent);
+
     }
 
     @Override
@@ -368,24 +368,6 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     }
 
     //LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(PlayerService.this);
-    Thread t = new Thread(new Runnable() {
-        /* this thread serves double purpose
-         * to update the seekbar and to let the fragment know
-         * that the music is playing and to update playback status.
-         * This is to prevent the playback status from becoming inconsistent
-         * when the Fragment is eventually killed due to TabAdapter.
-         */
-        public void run() {
-            if(mediaPlayer != null && mediaPlayer.isPlaying()) {
-                localintent.putExtra("Duration", mediaPlayer.getDuration());
-                localintent.putExtra("Current", mediaPlayer.getCurrentPosition());
-                localintent.putExtra("IsPlaying", mediaPlayer.isPlaying());
-                localintent.putExtra("Completed", false);
-                sendBroadcast(localintent);
-            }
-            mHandler.postDelayed(this, 100);
-        }
-    });
 
 
     public class LocalBinder extends Binder {

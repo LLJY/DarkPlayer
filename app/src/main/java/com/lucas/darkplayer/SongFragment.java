@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
@@ -66,14 +67,13 @@ public class SongFragment extends Fragment implements Serializable {
     boolean loop = false;
     static int songInList = 0;
     boolean changeOnShuffle;
-    TextView song, artist;
-    TextView seekCurr, seekEnd;
-    TextView noSongs, noSongs1;
+    TextView song, artist, seekCurr, seekEnd, noSongs, noSongs1;
     String playlistName;
     boolean fromPlaylist = false;
     private SensorManager mSensorManager;
     private ShakeListener mSensorListener;
     private SlidingPaneLayout mLayout;
+    private Handler mHandler = new Handler();
     ImageView img, img2;
     int previousSong = 0;
     private boolean sts;
@@ -101,13 +101,13 @@ public class SongFragment extends Fragment implements Serializable {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            int duration = intent.getExtras().getInt("Duration");
-            int index = intent.getIntExtra("index",0);
-            int current = intent.getExtras().getInt("Current");
-            boolean playing = intent.getBooleanExtra("IsPlaying", false);
+            boolean updateIndex = intent.getBooleanExtra("updateIndex",false);
+            boolean updatePlayerStatus = intent.getBooleanExtra("updatePlayerStatus", false);
             completed = intent.getBooleanExtra("Completed", false);
-            if(index != songInList && index != 0){
-                songInList=index;
+            if(updateIndex){
+                int index = intent.getIntExtra("index",0);
+                previousSong=songInList;
+                songInList = indexOf(shuffleList, index);
                 onSongChange();
             }
             if (completed && !loop) {
@@ -120,31 +120,24 @@ public class SongFragment extends Fragment implements Serializable {
                 songInList--;
                 nextSong();
             }
-            if (playing) {
-                pStatus = PlaybackStatus.PLAYING;
-                playPause.setImageResource(R.drawable.pause);
-                playPause2.setImageResource(R.drawable.pause);
-                pStatus = PlaybackStatus.PLAYING;
-                songStat.setMax(duration);
-                songStat.setProgress(current);
-                String time = String.format(Locale.ENGLISH, "%02d:%02d",
-                        TimeUnit.MILLISECONDS.toMinutes(duration),
-                        TimeUnit.MILLISECONDS.toSeconds(duration) -
-                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration))
-                );
-                String time1 = String.format(Locale.ENGLISH, "%02d:%02d",
-                        TimeUnit.MILLISECONDS.toMinutes(current),
-                        TimeUnit.MILLISECONDS.toSeconds(current) -
-                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(current))
-                );
-                seekCurr.setText(time1);
-                seekEnd.setText(time);
-
-            } else {
-                pStatus = PlaybackStatus.PAUSED;
-                playPause.setImageResource(R.drawable.play);
-                playPause2.setImageResource(R.drawable.play);
+            if(updatePlayerStatus){
+                pStatus=(PlaybackStatus)intent.getSerializableExtra("pStatus");
+                switch(pStatus){
+                    case PAUSED:
+                        playPause.setImageResource(R.drawable.play);
+                        playPause2.setImageResource(R.drawable.play);
+                        break;
+                    case PLAYING:
+                        playPause.setImageResource(R.drawable.pause);
+                        playPause2.setImageResource(R.drawable.pause);
+                        break;
+                    case STOPPED:
+                        playPause.setImageResource(R.drawable.play);
+                        playPause2.setImageResource(R.drawable.play);
+                        break;
+                }
             }
+
 
         }
     };
@@ -194,7 +187,6 @@ public class SongFragment extends Fragment implements Serializable {
             e.printStackTrace();
         }
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        final StoreData storage = new StoreData(getActivity().getApplicationContext());
         //set ID's for ui elements
         sts = prefs.getBoolean("sts", false);
         changeOnShuffle = prefs.getBoolean("changeOnShuffle", false);
@@ -250,7 +242,9 @@ public class SongFragment extends Fragment implements Serializable {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                seekAudio(true);
+                if(pStatus==PlaybackStatus.PLAYING){
+                    player.mediaPlayer.seekTo(songStat.getProgress());
+                }
             }
         });
 
@@ -442,6 +436,34 @@ public class SongFragment extends Fragment implements Serializable {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int duration;
+                int current;
+                if(serviceBound){
+                    if(player.mediaPlayer != null){
+                        duration = player.mediaPlayer.getDuration();
+                        current = player.mediaPlayer.getCurrentPosition();
+                        songStat.setMax(duration);
+                        songStat.setProgress(current);
+                        String time = String.format(Locale.ENGLISH, "%02d:%02d",
+                                TimeUnit.MILLISECONDS.toMinutes(duration),
+                                TimeUnit.MILLISECONDS.toSeconds(duration) -
+                                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration))
+                        );
+                        String time1 = String.format(Locale.ENGLISH, "%02d:%02d",
+                                TimeUnit.MILLISECONDS.toMinutes(current),
+                                TimeUnit.MILLISECONDS.toSeconds(current) -
+                                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(current))
+                        );
+                        seekCurr.setText(time1);
+                        seekEnd.setText(time);
+                    }
+                }
+                mHandler.postDelayed(this, 1000);
+            }
+        });
     }
 
 
@@ -536,8 +558,8 @@ public class SongFragment extends Fragment implements Serializable {
     }
 
     public void nextSong() {
-            player.next();
-        }
+        player.next();
+    }
 
     public void prevSong() {
         player.prev();
