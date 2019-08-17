@@ -322,6 +322,9 @@ public class SongFragment extends Fragment implements Serializable {
                                     }
                                 }
                                 songInList = storage.loadAudioIndex();
+                                if(songInList == -1){
+                                    songInList=0;
+                                }
                                 repeat.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
