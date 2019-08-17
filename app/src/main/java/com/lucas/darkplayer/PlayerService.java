@@ -35,6 +35,9 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener, Serializable,
 
         AudioManager.OnAudioFocusChangeListener {
+    private final IBinder myBinder = new LocalBinder();
+    public PlayerService(){
+    }
     /*
      * This is a service that handles playing music.
      * The original idea was to start this as a foreground service
@@ -57,12 +60,6 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     Boolean seek=false;
     Intent localintent = new Intent("seekto");
     private Handler mHandler = new Handler();
-    private final IBinder iBinder;
-
-    {
-        iBinder = new LocalBinder();
-    }
-
     private void initMediaPlayer() {
         /*
          * Initialises MediaPlayer and calls preparedAsync
@@ -107,7 +104,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             mediaPlayer.setVolume(1.0f, 1.0f);
         }
     }
-    private void stopPlaying() {
+    public void stopPlaying() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
         }
@@ -169,7 +166,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return myBinder;
     }
 
     @Override
@@ -293,6 +290,11 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         }
     }
 
+    public void reset(){
+        stopPlaying();
+        mediaPlayer.reset();
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //getting intents from SongFragment to tell PlayerService what to do.
@@ -315,14 +317,6 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                     SongFragment.pStatus = PlaybackStatus.PAUSED;
                     break;
             }
-        }
-        if (reset) {
-            /*
-             * Reset player to prepare to play new music
-             */
-            stopPlaying();
-            mediaPlayer.reset();
-            initMediaPlayer();
         }
 
         if(seek){

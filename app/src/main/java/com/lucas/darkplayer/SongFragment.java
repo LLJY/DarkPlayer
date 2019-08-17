@@ -462,17 +462,30 @@ public class SongFragment extends Fragment implements Serializable {
         return -1;
     }
 
-    private void playAudio(String media, boolean reset) {
-        StoreData storage = new StoreData(getActivity().getApplicationContext());
-        if (!serviceBound) {
-            Intent playerIntent = new Intent(getActivity(), PlayerService.class);
-            playerIntent.putExtra("media", media);
-            playerIntent.putExtra("reset", reset);
-            playerIntent.putExtra("pause", false);
-            onSongChange();
-            getActivity().startService(playerIntent);
-            getActivity().bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+    private void startService(ArrayList<SongData> audioList){
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("audiolist", audioList);
+        Intent startIntent = new Intent(getActivity(), PlayerService.class);
+        startIntent.putExtra("bundle", bundle);
+        if(!serviceBound) {
+            getActivity().startService(startIntent);
+            getActivity().bindService(startIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        }else{
+            getActivity().startService(startIntent);
         }
+
+    }
+
+    private void playAudio(String media, boolean reset) {
+        Intent playerIntent = new Intent(getActivity(), PlayerService.class);
+        playerIntent.putExtra("media", media);
+        playerIntent.putExtra("pause", false);
+        if(reset){
+            player.reset();
+        }
+        StoreData storage = new StoreData(getActivity().getApplicationContext());
+        onSongChange();
+        getActivity().startService(playerIntent);
         storage.storeAudioIndex(songInList);
         if (pStatus == PlaybackStatus.PLAYING) {
             storage.storeSession(true);
@@ -501,33 +514,21 @@ public class SongFragment extends Fragment implements Serializable {
         artist.setText(audioList.get(shuffleList[songInList]).getArtist());
     }
 
-    public void pauseResumeReset(boolean pause) {
-        StoreData storage = new StoreData(getActivity().getApplicationContext());
-        img.setImageURI(audioList.get(shuffleList[songInList]).getAlbumArt());
-        Intent pauseIntent = new Intent(getActivity(), PlayerService.class);
-        pauseIntent.putExtra("pause", pause);
-        getActivity().startService(pauseIntent);
-        if (pStatus == PlaybackStatus.PLAYING) {
-            storage.storeSession(true);
-        } else {
-            storage.storeSession(false);
-        }
-    }
-
     private void setPlayerStatus(int position, boolean skip) {
         switch (pStatus) {
             case PAUSED:
                 if (skip) {
                     playAudio(audioList.get(position).getSongId(), true);
                 } else {
-                    pauseResumeReset(true);
+                    player.resumePlayer();
                 }
                 break;
             case PLAYING:
                 if (skip) {
+                    player.reset();
                     playAudio(audioList.get(position).getSongId(), true);
                 } else {
-                    pauseResumeReset(true);
+                    player.pausePlayer();
                 }
                 break;
             case STOPPED:
