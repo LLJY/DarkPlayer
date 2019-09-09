@@ -72,6 +72,7 @@ public class SongFragment extends Fragment implements Serializable {
     int previousSong = 0;
     public PlaybackStatus pStatus = PlaybackStatus.STOPPED;
     public static PlayerService player;
+    int current;
     static ArrayList<SongData> audioList;
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -230,7 +231,8 @@ public class SongFragment extends Fragment implements Serializable {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 if(pStatus==PlaybackStatus.PLAYING){
-                    player.mediaPlayer.seekTo(songStat.getProgress());
+                    current = songStat.getProgress();
+                    player.mediaPlayer.seekTo(current);
                 }
             }
         });
@@ -428,7 +430,6 @@ public class SongFragment extends Fragment implements Serializable {
             @Override
             public void run() {
                 int duration;
-                int current;
                 if(serviceBound){
                     if(player.mediaPlayer != null){
                         duration = player.mediaPlayer.getDuration();
