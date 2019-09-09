@@ -573,7 +573,7 @@ public class SongFragment extends Fragment implements Serializable {
         }
         if (serviceBound) {
             //unbind on pause
-            player.unbindService(serviceConnection);
+            getActivity().unbindService(serviceConnection);
         }
         super.onPause();
     }
