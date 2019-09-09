@@ -105,7 +105,7 @@ public class SongFragment extends Fragment implements Serializable {
             if (completed && !loop) {
                 completed = false;
                 nextSong();
-            } else if (completed && loop) {
+            } else if (completed) {
                 //just decrement the index and call nextSong
                 //so the same song will be played
                 completed = false;
@@ -168,7 +168,7 @@ public class SongFragment extends Fragment implements Serializable {
         //get the arguments and values as early as possible
         Bundle arguments = getArguments();
         try {
-            fromPlaylist = arguments.getBoolean("playlist");
+            fromPlaylist = arguments.getBoolean("playlist", false);
             playlistName = arguments.getString("playlistName");
         } catch (NullPointerException e) {
             e.printStackTrace();
@@ -398,6 +398,7 @@ public class SongFragment extends Fragment implements Serializable {
                                 recyclerView.setVisibility(View.GONE);
                                 noSongs.setVisibility(View.VISIBLE);
                                 noSongs1.setVisibility(View.VISIBLE);
+
                             }
                         }
                     }
