@@ -56,7 +56,7 @@ public class SongFragment extends Fragment implements Serializable {
     RecyclerView recyclerView;
     SeekBar songStat;
     static int[] shuffleList;
-    boolean perm, completed=false, shuffled=false, loop=false, changeOnShuffle, fromPlaylist=false, sts, serviceBound=false;
+    boolean permissionGranted, completed=false, shuffled=false, loop=false, changeOnShuffle, fromPlaylist=false, shakeToShuffle, serviceBound=false;
     //initialise variables
     RecyclerAdapter adapter;
     ImageButton playPause, playPause2, shuffle, repeat;
@@ -175,7 +175,7 @@ public class SongFragment extends Fragment implements Serializable {
         }
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         //set ID's for ui elements
-        sts = prefs.getBoolean("sts", false);
+        shakeToShuffle = prefs.getBoolean("shakeToShuffle", false);
         changeOnShuffle = prefs.getBoolean("changeOnShuffle", false);
         img = view.findViewById(R.id.albumArtBig);
         img2 = view.findViewById(R.id.albumArtTop);
@@ -206,11 +206,11 @@ public class SongFragment extends Fragment implements Serializable {
         try {
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
-                perm = false;
+                permissionGranted = false;
                 ActivityCompat.requestPermissions(getActivity(),
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
             } else {
-                perm = true;
+                permissionGranted = true;
             }
 
         } catch (SecurityException e) {
@@ -265,7 +265,7 @@ public class SongFragment extends Fragment implements Serializable {
             @Override
             public void run() {
                 final ArrayList<SongData> a;
-                if (perm) {
+                if (permissionGranted) {
                     if (!fromPlaylist) {
                         a = PlaylistDBController.findAudio(getActivity());
                     } else {
@@ -280,7 +280,7 @@ public class SongFragment extends Fragment implements Serializable {
                     public void run() {
                         audioList = a;
                         if (!getActivity().isFinishing()) {
-                            if (perm && shuffleList != null && shuffleList.length!=0 ) {
+                            if (permissionGranted && shuffleList != null && shuffleList.length!=0 ) {
                                 if (fromPlaylist) {
                                     shuffleList = new int[audioList.size()];
                                     for (int l = 0; l < audioList.size(); l++) {
@@ -351,7 +351,7 @@ public class SongFragment extends Fragment implements Serializable {
                                 mSensorListener.setOnShakeListener(new ShakeListener.OnShakeListener() {
 
                                     public void onShake() {
-                                        if (sts) {
+                                        if (shakeToShuffle) {
                                             //check if shake to shuffle is enabled
                                             Toast.makeText(getActivity(), "Shuffling!", Toast.LENGTH_LONG).show();
                                             //shuffle when shaken
@@ -548,7 +548,7 @@ public class SongFragment extends Fragment implements Serializable {
     @Override
     public void onResume() {
         super.onResume();
-        if (perm) {
+        if (permissionGranted) {
             try {
                 mSensorManager.registerListener(mSensorListener,
                         mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
@@ -563,7 +563,7 @@ public class SongFragment extends Fragment implements Serializable {
 
     @Override
     public void onPause() {
-        if (perm) {
+        if (permissionGranted) {
             try {
                 mSensorManager.unregisterListener(mSensorListener);
                 getActivity().unregisterReceiver(receiver);
