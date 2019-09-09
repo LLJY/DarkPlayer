@@ -240,7 +240,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 Log.d("MediaPlayer Error", "ERROR: UNKNOWN" + u);
                 return true;
             case MediaPlayer.MEDIA_INFO_NOT_SEEKABLE:
-                Log.d("MediaPlayer Error", "ERROR: NOT SEEKABLE" + u);
+                Log.d("MediaPlayer Error", "ERROR: NOT SEEK-ABLE" + u);
                 return true;
             case MediaPlayer.MEDIA_INFO_AUDIO_NOT_PLAYING:
                 Log.d("MediaPlayer Error", "ERROR: MEDIA AUDIO NOT PLAYING" + u);
@@ -287,7 +287,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     }
 
     public void next() {
-        if(index<audioList.size()-1) {
+        if(index<audioList.size()) {
             index++;
             mediaFile = audioList.get(index).getSongId();
             reset();
@@ -312,6 +312,8 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //getting intents from SongFragment to tell PlayerService what to do.
+        IntentFilter filter = new IntentFilter("player");
+        registerReceiver(receiver, filter);
         Bundle bundle = intent.getBundleExtra("bundle");
         ArrayList<SongData> testList = (ArrayList<SongData>) bundle.getSerializable("audioList");
         boolean updateIndex = intent.getBooleanExtra("updateIndex",false);
@@ -323,8 +325,6 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         }
         seek = intent.getBooleanExtra("seek", false);
         seekTo = intent.getIntExtra("seekTo", 0);
-        IntentFilter filter = new IntentFilter("player");
-        registerReceiver(receiver, filter);
 
         if(seek){
             /*
@@ -364,10 +364,12 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             mediaPlayer.release();
         }
         removeAudioFocus();
-        unregisterReceiver(receiver);
+        try {
+            unregisterReceiver(receiver);
+        }catch(IllegalArgumentException e){
+            e.printStackTrace();
+        }
     }
-
-    //LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(PlayerService.this);
 
 
     public class LocalBinder extends Binder {

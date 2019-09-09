@@ -56,38 +56,29 @@ public class SongFragment extends Fragment implements Serializable {
     RecyclerView recyclerView;
     SeekBar songStat;
     static int[] shuffleList;
-    boolean mBound = false;
+    boolean mBound = false, perm, completed=false, shuffled=false, loop=false, changeOnShuffle, fromPlaylist=false, sts, serviceBound=false;
     //initialise variables
     RecyclerAdapter adapter;
-    boolean perm;
-    boolean completed = false;
     ImageButton playPause, playPause2, shuffle, repeat;
     ImageView shuffleOn, repeatOn;
-    boolean shuffled = false;
-    boolean loop = false;
     static int songInList = 0;
-    boolean changeOnShuffle;
     TextView song, artist, seekCurr, seekEnd, noSongs, noSongs1;
     String playlistName;
-    boolean fromPlaylist = false;
     private SensorManager mSensorManager;
     private ShakeListener mSensorListener;
     private SlidingPaneLayout mLayout;
     private Handler mHandler = new Handler();
     ImageView img, img2;
     int previousSong = 0;
-    private boolean sts;
-    public static PlaybackStatus pStatus = PlaybackStatus.STOPPED;
-    private PlayerService player;
-    boolean serviceBound = false;
+    public PlaybackStatus pStatus = PlaybackStatus.STOPPED;
+    public static PlayerService player;
     static ArrayList<SongData> audioList;
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
-            player = binder.getService();
+            SongFragment.player = binder.getService();
             Toast.makeText(getActivity(), "Service Bound!", Toast.LENGTH_LONG).show();
-            serviceBound = true;
         }
 
         @Override
@@ -150,7 +141,7 @@ public class SongFragment extends Fragment implements Serializable {
          */
         super.onDestroy();
         if (serviceBound) {
-            getActivity().unbindService(serviceConnection);
+           SongFragment.player.unbindService(serviceConnection);
             //service is active
             player.stopSelf();
         }
@@ -293,10 +284,10 @@ public class SongFragment extends Fragment implements Serializable {
                     public void run() {
                         audioList = a;
                         if (!getActivity().isFinishing()) {
-                            if (perm) {
+                            if (perm && shuffleList != null && shuffleList.length!=0 ) {
                                 if (fromPlaylist) {
                                     shuffleList = new int[audioList.size()];
-                                    for (int l = 0; l < audioList.size() - 1; l++) {
+                                    for (int l = 0; l < audioList.size(); l++) {
                                         shuffleList[l] = l;
                                     }
                                 }else {
@@ -314,7 +305,7 @@ public class SongFragment extends Fragment implements Serializable {
                                     } catch (NullPointerException e) {
                                         e.printStackTrace();
                                         shuffleList = new int[audioList.size()];
-                                        for (int l = 0; l < audioList.size() - 1; l++) {
+                                        for (int l = 0; l < audioList.size(); l++) {
                                             shuffleList[l] = l;
                                         }
                                     }
@@ -337,7 +328,7 @@ public class SongFragment extends Fragment implements Serializable {
                                         if (shuffled) {
                                             songInList = shuffleList[songInList];
                                             shuffleList = new int[audioList.size()];
-                                            for (int l = 0; l < audioList.size() - 1; l++) {
+                                            for (int l = 0; l < audioList.size(); l++) {
                                                 shuffleList[l] = l;
                                             }
                                             shuffled = false;
@@ -403,7 +394,7 @@ public class SongFragment extends Fragment implements Serializable {
                                 recyclerView.setVisibility(View.VISIBLE);
                                 noSongs.setVisibility(View.GONE);
                                 noSongs1.setVisibility(View.GONE);
-                                adapter = new RecyclerAdapter(audioList, getActivity().getApplication());
+                                adapter = new RecyclerAdapter(audioList, getActivity());
                                 recyclerView.setAdapter(adapter);
                                 recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                                 onSongChange();
@@ -473,7 +464,7 @@ public class SongFragment extends Fragment implements Serializable {
         shuffleOn.setVisibility(View.VISIBLE);
         int temp;
         int rand;
-        for (int l = 0; l < max - 1; l++) {
+        for (int l = 0; l < max; l++) {
             rand = ThreadLocalRandom.current().nextInt(0, max - 1);
             temp = playlist[rand];
             playlist[rand] = playlist[l];
@@ -514,13 +505,6 @@ public class SongFragment extends Fragment implements Serializable {
         onSongChange();
         getActivity().sendBroadcast(playerIntent);
 
-    }
-
-    private void seekAudio(boolean seek) {
-        Intent seekIntent = new Intent(getActivity(), PlayerService.class);
-        seekIntent.putExtra("seek", seek);
-        seekIntent.putExtra("seekTo", songStat.getProgress());
-        getActivity().startService(seekIntent);
     }
 
     public void onSongChange() {
@@ -569,18 +553,31 @@ public class SongFragment extends Fragment implements Serializable {
     public void onResume() {
         super.onResume();
         if (perm) {
-            mSensorManager.registerListener(mSensorListener,
-                    mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                    SensorManager.SENSOR_DELAY_UI);
-            getActivity().registerReceiver(receiver, new IntentFilter("seekto"));
+            try {
+                mSensorManager.registerListener(mSensorListener,
+                        mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                        SensorManager.SENSOR_DELAY_UI);
+                getActivity().registerReceiver(receiver, new IntentFilter("seekto"));
+            }catch(NullPointerException e){
+                e.printStackTrace();
+            }
         }
+
     }
 
     @Override
     public void onPause() {
         if (perm) {
-            mSensorManager.unregisterListener(mSensorListener);
-            getActivity().unregisterReceiver(receiver);
+            try {
+                mSensorManager.unregisterListener(mSensorListener);
+                getActivity().unregisterReceiver(receiver);
+            }catch(NullPointerException e){
+                e.printStackTrace();
+            }
+        }
+        if (serviceBound) {
+            //unbind on pause
+            SongFragment.player.unbindService(serviceConnection);
         }
         super.onPause();
     }
