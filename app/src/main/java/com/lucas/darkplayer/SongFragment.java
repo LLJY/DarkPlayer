@@ -282,7 +282,7 @@ public class SongFragment extends Fragment implements Serializable {
                     public void run() {
                         audioList = a;
                         if (!getActivity().isFinishing()) {
-                            if (permissionGranted && shuffleList != null && shuffleList.length!=0 ) {
+                            if (permissionGranted && a != null && a.size() != 0 ) {
                                 if (fromPlaylist) {
                                     shuffleList = new int[audioList.size()];
                                     for (int l = 0; l < audioList.size(); l++) {
