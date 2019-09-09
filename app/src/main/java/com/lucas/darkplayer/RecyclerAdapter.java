@@ -49,7 +49,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<viewHolder> {
     public void onBindViewHolder(viewHolder holder, int position) {
         holder.title.setText(list.get(position).getTitle());
         holder.description.setText(list.get(position).getArtist());
-        holder.imageView.setImageURI(null);
         holder.imageView.setImageURI(list.get(position).getAlbumArt());
         if(SongFragment.shuffleList[SongFragment.songInList] == position) {
             holder.playPause.setVisibility(View.VISIBLE);
