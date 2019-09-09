@@ -56,7 +56,7 @@ public class SongFragment extends Fragment implements Serializable {
     RecyclerView recyclerView;
     SeekBar songStat;
     static int[] shuffleList;
-    boolean mBound = false, perm, completed=false, shuffled=false, loop=false, changeOnShuffle, fromPlaylist=false, sts, serviceBound=false;
+    boolean perm, completed=false, shuffled=false, loop=false, changeOnShuffle, fromPlaylist=false, sts, serviceBound=false;
     //initialise variables
     RecyclerAdapter adapter;
     ImageButton playPause, playPause2, shuffle, repeat;
@@ -77,8 +77,9 @@ public class SongFragment extends Fragment implements Serializable {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
-            SongFragment.player = binder.getService();
+            player = binder.getService();
             Toast.makeText(getActivity(), "Service Bound!", Toast.LENGTH_LONG).show();
+            serviceBound = true;
         }
 
         @Override
@@ -140,11 +141,6 @@ public class SongFragment extends Fragment implements Serializable {
          * Fragment is destroyed
          */
         super.onDestroy();
-        if (serviceBound) {
-           SongFragment.player.unbindService(serviceConnection);
-            //service is active
-            player.stopSelf();
-        }
     }
 
     @Override
@@ -577,7 +573,7 @@ public class SongFragment extends Fragment implements Serializable {
         }
         if (serviceBound) {
             //unbind on pause
-            SongFragment.player.unbindService(serviceConnection);
+            player.unbindService(serviceConnection);
         }
         super.onPause();
     }
@@ -592,8 +588,6 @@ public class SongFragment extends Fragment implements Serializable {
     @Override
     public void onStop() {
         super.onStop();
-        getActivity().unbindService(serviceConnection);
-        mBound = false;
     }
 
 }
