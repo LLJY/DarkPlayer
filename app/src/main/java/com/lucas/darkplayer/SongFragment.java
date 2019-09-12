@@ -98,9 +98,10 @@ public class SongFragment extends Fragment implements Serializable {
             boolean updatePlayerStatus = intent.getBooleanExtra("updatePlayerStatus", false);
             completed = intent.getBooleanExtra("Completed", false);
             if(updateIndex){
-                int index = intent.getIntExtra("index",0);
-                previousSong=songInList;
-                songInList = indexOf(shuffleList, index);
+                //store previous song so rV updates properly
+                previousSong=shuffleList[songInList];
+                songInList = intent.getIntExtra("index",0);
+                shuffleList = intent.getIntArrayExtra("shuffleList");
                 onSongChange();
             }
             if (completed && !loop) {
@@ -326,16 +327,9 @@ public class SongFragment extends Fragment implements Serializable {
                                             shuffled = false;
                                             shuffleOn.setVisibility(View.GONE);
                                         } else {
+                                            shuffled=true;
                                             previousSong = shuffleList[songInList];
-                                            shuffleList = shuffle(shuffleList, audioList.size());
-                                            if (changeOnShuffle) {
-                                                setPlayerStatus(true);
-                                            } else {
-                                                previousSong = shuffleList[songInList];
-                                                if (indexOf(shuffleList, previousSong) != -1) {
-                                                    songInList = indexOf(shuffleList, previousSong);
-                                                }
-                                            }
+                                            player.shuffle();
                                             shuffleOn.setVisibility(View.VISIBLE);
                                         }
                                     }
@@ -347,21 +341,17 @@ public class SongFragment extends Fragment implements Serializable {
                                 mSensorListener.setOnShakeListener(new ShakeListener.OnShakeListener() {
 
                                     public void onShake() {
-                                        if (shakeToShuffle) {
+                                        if (shakeToShuffle && !shuffled) {
                                             //check if shake to shuffle is enabled
                                             Toast.makeText(getActivity(), "Shuffling!", Toast.LENGTH_LONG).show();
                                             //shuffle when shaken
                                             previousSong = shuffleList[songInList];
-                                            shuffleList = shuffle(shuffleList, audioList.size());
-                                            if (changeOnShuffle) {
-                                                setPlayerStatus(true);
-                                            } else {
-                                                previousSong = shuffleList[songInList];
-                                                if (indexOf(shuffleList, previousSong) != -1) {
-                                                    songInList = indexOf(shuffleList, previousSong);
-                                                }
-                                            }
+                                            player.shuffle();
                                             shuffleOn.setVisibility(View.VISIBLE);
+                                        }else if(shakeToShuffle && shuffled){
+                                            shuffled=false;
+                                            defaultShuffleList();
+                                            shuffleOn.setVisibility(View.GONE);
                                         }
                                     }
                                 });
@@ -406,11 +396,28 @@ public class SongFragment extends Fragment implements Serializable {
     }
     private void defaultShuffleList() {
         if(shuffleList != null && shuffleList.length != 0) {
-            songInList = shuffleList[songInList];
-        }
-        shuffleList = new int[audioList.size()];
-        for (int i = 0; i < audioList.size(); i++) {
-            shuffleList[i] = i;
+            /*
+            * if shuffleList already exists, we will call the method in player instead
+            * and let it handle regenerating the new list
+             */
+            try {
+                player.defaultShuffleList();
+            }catch (NullPointerException e){
+                e.printStackTrace();
+                /*
+                * NullPointerException likely means that the service has not started or is not bound
+                * we will manually generate the list in that case.
+                 */
+                shuffleList = new int[audioList.size()];
+                for (int i = 0; i < audioList.size(); i++) {
+                    shuffleList[i] = i;
+                }
+            }
+        }else {
+            shuffleList = new int[audioList.size()];
+            for (int i = 0; i < audioList.size(); i++) {
+                shuffleList[i] = i;
+            }
         }
     }
 
@@ -456,23 +463,6 @@ public class SongFragment extends Fragment implements Serializable {
                 mHandler.postDelayed(this, 1000);
             }
         });
-    }
-
-
-    private int[] shuffle(int[] playlist, int max) {
-        //please run this function in seperate thread to avoid stalls
-        shuffled = true;
-        shuffleOn.setVisibility(View.VISIBLE);
-        int temp;
-        int rand;
-        for (int i = 0; i < max; i++) {
-            rand = ThreadLocalRandom.current().nextInt(0, max - 1);
-            temp = playlist[rand];
-            playlist[rand] = playlist[i];
-            playlist[i] = temp;
-        }
-        songInList = 0;
-        return playlist;
     }
 
     private int indexOf(int[] array, int element) {

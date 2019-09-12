@@ -33,6 +33,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class PlayerService extends Service implements MediaPlayer.OnCompletionListener,
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
@@ -64,14 +65,19 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private ArrayList<SongData> audioList;
     int seekTo=0;
     int index = 0;
-    Boolean seek=false;
+    boolean seek=false;
+    boolean shuffled=false;
     Intent localintent = new Intent("seekto");
     private Handler mHandler = new Handler();
     BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            //unlike the mess of what we did previously, service and ui should communicate via broadcasts
+            //and not by calling methods and variables directly from each other as we did previously.
             boolean updateIndex=intent.getBooleanExtra("updateIndex",false);
             if(updateIndex){
+                //if index has changed in ui, update it in service
+                //basically this happens when the user selects a song from rV.
                 index = intent.getIntExtra("index",0);
                 shuffleList = intent.getIntArrayExtra("shuffleList");
                 index = shuffleList[index];
@@ -79,7 +85,6 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 mediaFile=audioList.get(shuffleList[index]).getSongId();
                 initMediaPlayer();
             }
-
         }
     };
     private void initMediaPlayer() {
@@ -114,7 +119,8 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private void startPlaying() {
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
-            localintent.putExtra("index", shuffleList[index]);
+            localintent.putExtra("index", index);
+            localintent.putExtra("shuffleList", shuffleList);
             localintent.putExtra("updateIndex", true);
             sendBroadcast(localintent);
             updatePlayerStatus(PlaybackStatus.PLAYING);
@@ -290,7 +296,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     }
 
     public void next() {
-        if(index<audioList.size()) {
+        if(index<audioList.size()-1) {
             index++;
             mediaFile = audioList.get(shuffleList[index]).getSongId();
             reset();
@@ -308,9 +314,53 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     }
 
     public void reset(){
+        /*
+        * function to reset mediaplayer and stop playing songs
+        * so that a new song can be loaded
+        * might not actually be needed, I might rethink this later
+        * but leave it for now
+         */
         stopPlaying();
         mediaPlayer.reset();
     }
+
+    public void playIndex(int index){
+        /*
+        * function to reset and then play a song from the selected index
+        * this might replace reset() later as in most cases, reset() is used followed by playing a new song.
+         */
+        reset();
+        mediaFile= audioList.get(index).getSongId();
+        initMediaPlayer();
+    }
+
+    public void defaultShuffleList() {
+        shuffled=false;
+        if(shuffleList != null && shuffleList.length != 0) {
+            index = shuffleList[index];
+        }
+        shuffleList = new int[audioList.size()];
+        for (int i = 0; i < audioList.size(); i++) {
+            shuffleList[i] = i;
+        }
+    }
+
+    public void shuffle() {
+        //please run this function in seperate thread to avoid stalls
+        shuffled = true;
+        int temp;
+        int rand;
+        for (int i = 0; i < audioList.size(); i++) {
+            rand = ThreadLocalRandom.current().nextInt(0, audioList.size()-1);
+            temp = shuffleList[rand];
+            shuffleList[rand] = shuffleList[i];
+            shuffleList[i] = temp;
+        }
+        index = 0;
+        //reset and play new song from shuffleList
+        playIndex(shuffleList[index]);
+    }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -318,6 +368,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         IntentFilter filter = new IntentFilter("player");
         registerReceiver(receiver, filter);
         Bundle bundle = intent.getBundleExtra("bundle");
+        //store array as a test list as we are unsure if it is a null array.
         ArrayList<SongData> testList = (ArrayList<SongData>) bundle.getSerializable("audioList");
         boolean updateIndex = intent.getBooleanExtra("updateIndex",false);
         if(testList != null){
