@@ -178,7 +178,6 @@ public class SongFragment extends Fragment implements Serializable {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         //set ID's for ui elements
         shakeToShuffle = prefs.getBoolean("shakeToShuffle", false);
-        changeOnShuffle = prefs.getBoolean("changeOnShuffle", false);
         img = view.findViewById(R.id.albumArtBig);
         img2 = view.findViewById(R.id.albumArtTop);
         song = view.findViewById(R.id.title);
@@ -465,7 +464,7 @@ public class SongFragment extends Fragment implements Serializable {
         });
     }
 
-    private int indexOf(int[] array, int element) {
+    public static int indexOf(int[] array, int element) {
         for (int i = 0; i < array.length; i++) {
             if (array[i] == element)
                 return i;
