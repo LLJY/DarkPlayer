@@ -63,8 +63,8 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private String mediaFile;
     private AudioManager audioManager;
     private PlaybackStatus pStatus = PlaybackStatus.STOPPED;
-    private int resumePosition;
-    private int[] shuffleList;
+    public int resumePosition;
+    public int[] shuffleList;
     private ArrayList<SongData> audioList;
     int seekTo=0;
     int index = 0;

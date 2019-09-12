@@ -48,7 +48,6 @@ import android.widget.Toast;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 
@@ -233,6 +232,7 @@ public class SongFragment extends Fragment implements Serializable {
                 if(pStatus==PlaybackStatus.PLAYING){
                     current = songStat.getProgress();
                     player.mediaPlayer.seekTo(current);
+                    player.resumePosition = current;
                 }
             }
         });
