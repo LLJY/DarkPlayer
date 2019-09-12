@@ -360,8 +360,8 @@ public class SongFragment extends Fragment implements Serializable {
                                             public void onItemClick(View view, int position) {
                                                 //store prev to update item so that playing button is shown
                                                 previousSong = shuffleList[songInList];
-                                                if (indexOf(shuffleList, position) != -1)
-                                                    songInList = indexOf(shuffleList, position);
+                                                if (CommonMethods.indexOf(shuffleList, position) != -1)
+                                                    songInList = CommonMethods.indexOf(shuffleList, position);
                                                 setPlayerStatus(true);
                                             }
 
@@ -464,13 +464,6 @@ public class SongFragment extends Fragment implements Serializable {
         });
     }
 
-    public static int indexOf(int[] array, int element) {
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] == element)
-                return i;
-        }
-        return -1;
-    }
 
     private void startService(ArrayList<SongData> audioList, int index){
         Bundle bundle = new Bundle();

@@ -365,7 +365,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         if(changeOnShuffle) {
             playIndex(shuffleList[index]);
         }else{
-            index = SongFragment.indexOf(shuffleList, curr);
+            index = CommonMethods.indexOf(shuffleList, curr);
         }
     }
 
