@@ -60,6 +60,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private AudioManager audioManager;
     private PlaybackStatus pStatus = PlaybackStatus.STOPPED;
     private int resumePosition;
+    private int[] shuffleList;
     private ArrayList<SongData> audioList;
     int seekTo=0;
     int index = 0;
@@ -72,8 +73,10 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             boolean updateIndex=intent.getBooleanExtra("updateIndex",false);
             if(updateIndex){
                 index = intent.getIntExtra("index",0);
+                shuffleList = intent.getIntArrayExtra("shuffleList");
+                index = shuffleList[index];
                 reset();
-                mediaFile=audioList.get(index).getSongId();
+                mediaFile=audioList.get(shuffleList[index]).getSongId();
                 initMediaPlayer();
             }
 
@@ -111,7 +114,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private void startPlaying() {
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
-            localintent.putExtra("index", index);
+            localintent.putExtra("index", shuffleList[index]);
             localintent.putExtra("updateIndex", true);
             sendBroadcast(localintent);
             updatePlayerStatus(PlaybackStatus.PLAYING);
@@ -289,7 +292,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     public void next() {
         if(index<audioList.size()) {
             index++;
-            mediaFile = audioList.get(index).getSongId();
+            mediaFile = audioList.get(shuffleList[index]).getSongId();
             reset();
             initMediaPlayer();
         }
@@ -298,7 +301,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     public void prev() {
         if(index>=0) {
             index--;
-            mediaFile = audioList.get(index).getSongId();
+            mediaFile = audioList.get(shuffleList[index]).getSongId();
             reset();
             initMediaPlayer();
         }
@@ -321,7 +324,11 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             audioList=testList;
         }
         if(updateIndex){
+            shuffleList = intent.getIntArrayExtra("shuffleList");
             index = intent.getIntExtra("index", 0);
+            if(shuffleList != null){
+                index = shuffleList[index];
+            }
         }
         seek = intent.getBooleanExtra("seek", false);
         seekTo = intent.getIntExtra("seekTo", 0);
@@ -340,7 +347,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
 
         try {
             //An audio file is passed to the service through putExtra();
-            mediaFile = audioList.get(index).getSongId();
+            mediaFile = audioList.get(shuffleList[index]).getSongId();
         } catch (NullPointerException e) {
             stopSelf();
         }

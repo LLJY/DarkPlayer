@@ -490,6 +490,7 @@ public class SongFragment extends Fragment implements Serializable {
         startIntent.putExtra("bundle", bundle);
         startIntent.putExtra("updateIndex", true);
         startIntent.putExtra("index", index);
+        startIntent.putExtra("shuffleList", shuffleList);
         getActivity().startService(startIntent);
         if(!serviceBound) {
             getActivity().bindService(startIntent, serviceConnection, Context.BIND_AUTO_CREATE);
@@ -502,6 +503,7 @@ public class SongFragment extends Fragment implements Serializable {
         if(reset){
             playerIntent.putExtra("index", shuffleList[songInList]);
             playerIntent.putExtra("updateIndex", true);
+            playerIntent.putExtra("shuffleList", shuffleList);
         }
         onSongChange();
         getActivity().sendBroadcast(playerIntent);
