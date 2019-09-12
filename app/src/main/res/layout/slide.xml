@@ -121,8 +121,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
+            android:text="--:--"
             android:textColor="@android:color/white"
-            android:text="00:00"
             app:layout_constraintStart_toStartOf="@+id/seekBar"
             app:layout_constraintTop_toTopOf="@id/seekBar" />
 
@@ -132,8 +132,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
+            android:text="--:--"
             android:textColor="@android:color/white"
-            android:text="00:00"
             app:layout_constraintEnd_toEndOf="@+id/seekBar"
             app:layout_constraintTop_toTopOf="@id/seekBar" />
 
