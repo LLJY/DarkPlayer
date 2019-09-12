@@ -240,14 +240,14 @@ public class SongFragment extends Fragment implements Serializable {
         playPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setPlayerStatus(shuffleList[songInList], false);
+                setPlayerStatus(false);
             }
         });
 
         playPause2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setPlayerStatus(shuffleList[songInList], false);
+                setPlayerStatus(false);
             }
         });
         next.setOnClickListener(new View.OnClickListener() {
@@ -329,7 +329,7 @@ public class SongFragment extends Fragment implements Serializable {
                                             previousSong = shuffleList[songInList];
                                             shuffleList = shuffle(shuffleList, audioList.size());
                                             if (changeOnShuffle) {
-                                                setPlayerStatus(shuffleList[songInList], true);
+                                                setPlayerStatus(true);
                                             } else {
                                                 previousSong = shuffleList[songInList];
                                                 if (indexOf(shuffleList, previousSong) != -1) {
@@ -354,7 +354,7 @@ public class SongFragment extends Fragment implements Serializable {
                                             previousSong = shuffleList[songInList];
                                             shuffleList = shuffle(shuffleList, audioList.size());
                                             if (changeOnShuffle) {
-                                                setPlayerStatus(shuffleList[songInList], true);
+                                                setPlayerStatus(true);
                                             } else {
                                                 previousSong = shuffleList[songInList];
                                                 if (indexOf(shuffleList, previousSong) != -1) {
@@ -373,7 +373,7 @@ public class SongFragment extends Fragment implements Serializable {
                                                 previousSong = shuffleList[songInList];
                                                 if (indexOf(shuffleList, position) != -1)
                                                     songInList = indexOf(shuffleList, position);
-                                                setPlayerStatus(shuffleList[songInList], true);
+                                                setPlayerStatus(true);
                                             }
 
                                             @Override
@@ -521,7 +521,7 @@ public class SongFragment extends Fragment implements Serializable {
         artist.setText(audioList.get(shuffleList[songInList]).getArtist());
     }
 
-    private void setPlayerStatus(int position, boolean skip) {
+    private void setPlayerStatus(boolean skip) {
         switch (pStatus) {
             case PAUSED:
                 if (skip) {
