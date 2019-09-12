@@ -106,7 +106,7 @@ public class SongFragment extends Fragment implements Serializable {
             if (completed && !loop) {
                 completed = false;
                 nextSong();
-            } else if (completed) {
+            } else if (completed && loop) {
                 //just decrement the index and call nextSong
                 //so the same song will be played
                 completed = false;
@@ -285,9 +285,7 @@ public class SongFragment extends Fragment implements Serializable {
                             if (permissionGranted && a != null && a.size() != 0 ) {
                                 if (fromPlaylist) {
                                     shuffleList = new int[audioList.size()];
-                                    for (int l = 0; l < audioList.size(); l++) {
-                                        shuffleList[l] = l;
-                                    }
+                                    defaultShuffleList();
                                 }else {
                                     try {
                                         if (sState.getBoolean("shuffled")) {
@@ -303,9 +301,7 @@ public class SongFragment extends Fragment implements Serializable {
                                     } catch (NullPointerException e) {
                                         e.printStackTrace();
                                         shuffleList = new int[audioList.size()];
-                                        for (int l = 0; l < audioList.size(); l++) {
-                                            shuffleList[l] = l;
-                                        }
+                                        defaultShuffleList();
                                     }
                                 }
                                 repeat.setOnClickListener(new View.OnClickListener() {
@@ -326,9 +322,7 @@ public class SongFragment extends Fragment implements Serializable {
                                         if (shuffled) {
                                             songInList = shuffleList[songInList];
                                             shuffleList = new int[audioList.size()];
-                                            for (int l = 0; l < audioList.size(); l++) {
-                                                shuffleList[l] = l;
-                                            }
+                                            defaultShuffleList();
                                             shuffled = false;
                                             shuffleOn.setVisibility(View.GONE);
                                         } else {
@@ -410,6 +404,15 @@ public class SongFragment extends Fragment implements Serializable {
 
         return view;
     }
+    private void defaultShuffleList() {
+        if(shuffleList != null && shuffleList.length != 0) {
+            songInList = shuffleList[songInList];
+        }
+        shuffleList = new int[audioList.size()];
+        for (int i = 0; i < audioList.size(); i++) {
+            shuffleList[i] = i;
+        }
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -462,20 +465,20 @@ public class SongFragment extends Fragment implements Serializable {
         shuffleOn.setVisibility(View.VISIBLE);
         int temp;
         int rand;
-        for (int l = 0; l < max; l++) {
+        for (int i = 0; i < max; i++) {
             rand = ThreadLocalRandom.current().nextInt(0, max - 1);
             temp = playlist[rand];
-            playlist[rand] = playlist[l];
-            playlist[l] = temp;
+            playlist[rand] = playlist[i];
+            playlist[i] = temp;
         }
         songInList = 0;
         return playlist;
     }
 
     private int indexOf(int[] array, int element) {
-        for (int l = 0; l < array.length; l++) {
-            if (array[l] == element)
-                return l;
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == element)
+                return i;
         }
         return -1;
     }
