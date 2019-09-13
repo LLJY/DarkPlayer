@@ -55,7 +55,7 @@ public class SongFragment extends Fragment implements Serializable {
     RecyclerView recyclerView;
     SeekBar songStat;
     static int[] shuffleList;
-    boolean permissionGranted, completed=false, shuffled=false, loop=false, changeOnShuffle, fromPlaylist=false, shakeToShuffle, serviceBound=false;
+    boolean permissionGranted, shuffled=false, loop=false, changeOnShuffle, fromPlaylist=false, shakeToShuffle, serviceBound=false;
     //initialise variables
     RecyclerAdapter adapter;
     ImageButton playPause, playPause2, shuffle, repeat;
@@ -95,23 +95,12 @@ public class SongFragment extends Fragment implements Serializable {
         public void onReceive(Context context, Intent intent) {
             boolean updateIndex = intent.getBooleanExtra("updateIndex",false);
             boolean updatePlayerStatus = intent.getBooleanExtra("updatePlayerStatus", false);
-            completed = intent.getBooleanExtra("Completed", false);
             if(updateIndex){
                 //store previous song so rV updates properly
                 previousSong=shuffleList[songInList];
                 songInList = intent.getIntExtra("index",0);
                 shuffleList = intent.getIntArrayExtra("shuffleList");
                 onSongChange();
-            }
-            if (completed && !loop) {
-                completed = false;
-                nextSong();
-            } else if (completed && loop) {
-                //just decrement the index and call nextSong
-                //so the same song will be played
-                completed = false;
-                songInList--;
-                nextSong();
             }
             if(updatePlayerStatus){
                 pStatus=player.pStatus;

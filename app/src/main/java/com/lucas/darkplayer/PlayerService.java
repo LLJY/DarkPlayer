@@ -207,7 +207,8 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
         //send intent over to SongFragment to tell it that song has completed
-        localintent.putExtra("Completed", true);
+        next();
+        localintent.putExtra("updateIndex", true);
         sendBroadcast(localintent);
 
     }
