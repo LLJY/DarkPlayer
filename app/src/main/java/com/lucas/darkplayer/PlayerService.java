@@ -16,6 +16,7 @@ package com.lucas.darkplayer;
  */
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -32,10 +33,12 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.telephony.PhoneStateListener;
@@ -75,6 +78,8 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private AudioManager audioManager;
     public int pStatus = PlaybackStateCompat.STATE_STOPPED;
     public int resumePosition;
+    PlaybackStateCompat state;
+    long elapsed = 0;
     public int[] shuffleList;
     private ArrayList<SongData> audioList;
     int seekTo=0;
@@ -108,6 +113,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         /*
          * Initialises MediaPlayer and calls preparedAsync
          */
+        elapsed = SystemClock.elapsedRealtime();
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setOnErrorListener(this);
         mediaPlayer.setOnPreparedListener(this);
@@ -372,18 +378,15 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
 
             @Override
             public void onSeekTo(long pos) {
+                int seek = (int) pos;
+                mediaPlayer.seekTo(seek);
                 super.onSeekTo(pos);
             }
         });
         mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
-        PlaybackStateCompat state = new PlaybackStateCompat.Builder()
-                .setActions(
-                        PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE | PlaybackState.ACTION_SEEK_TO | PlaybackState.ACTION_SKIP_TO_NEXT | PlaybackState.ACTION_SKIP_TO_PREVIOUS)
-                .build();
         if(!mSession.isActive()){
             mSession.setActive(true);
         }
-        mSession.setPlaybackState(state);
     }
 
     private void buildNotification(){
@@ -399,6 +402,9 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 .setContentTitle(audioList.get(shuffleList[index]).getTitle())
                 .setContentText(audioList.get(shuffleList[index]).getArtist())
                 .setLargeIcon(bitmap)
+                //.addAction(android.R.drawable.ic_media_previous, "Previous",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
+                //.addAction(android.R.drawable.ic_media_pause, "Pause",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PAUSE))
+                //.addAction(android.R.drawable.ic_media_next, "Next",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
                 .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(mSession.getSessionToken()))
                 .build();
@@ -480,6 +486,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //get values from sharedprefs
+        MediaButtonReceiver.handleIntent(mSession, intent);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         changeOnShuffle = prefs.getBoolean("changeOnShuffle", false);
         //getting intents from SongFragment to tell PlayerService what to do.
@@ -487,7 +494,12 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         registerReceiver(receiver, filter);
         Bundle bundle = intent.getBundleExtra("bundle");
         //store array as a test list as we are unsure if it is a null array.
-        ArrayList<SongData> testList = (ArrayList<SongData>) bundle.getSerializable("audioList");
+        ArrayList <SongData> testList = null;
+        try {
+            testList = (ArrayList<SongData>) bundle.getSerializable("audioList");
+        }catch (NullPointerException e){
+            e.printStackTrace();
+        }
         boolean updateIndex = intent.getBooleanExtra("updateIndex",false);
         if(testList != null){
             audioList=testList;
@@ -530,9 +542,15 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         if (mediaFile != null && mediaFile != "")
             initMediaPlayer();
             initMediaSession();
-
+            try {
+                t.start();
+            }catch (IllegalThreadStateException e){
+                e.printStackTrace();
+            }
         return super.onStartCommand(intent, flags, startId);
     }
+
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -547,6 +565,22 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             e.printStackTrace();
         }
     }
+
+    Thread t = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            //this thread updates playbackState so that seekbar in notification works.
+            if(mediaPlayer != null) {
+                state = new PlaybackStateCompat.Builder()
+                        .setActions(
+                                PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE | PlaybackState.ACTION_SEEK_TO | PlaybackState.ACTION_SKIP_TO_NEXT | PlaybackState.ACTION_SKIP_TO_PREVIOUS)
+                        .setState(pStatus, mediaPlayer.getCurrentPosition(), 1, elapsed)
+                        .build();
+                mSession.setPlaybackState(state);
+                mHandler.postDelayed(this, 1000);
+            }
+        }
+    });
 
 
     public class LocalBinder extends Binder {
