@@ -68,6 +68,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private ArrayList<SongData> audioList;
     int seekTo=0;
     public int index = 0;
+    private StoreData storage = new StoreData(this);
     boolean seek=false;
     boolean shuffled=false;
     Intent localintent = new Intent("seekto");
@@ -207,9 +208,16 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
         //send intent over to SongFragment to tell it that song has completed
-        next();
-        localintent.putExtra("updateIndex", true);
-        sendBroadcast(localintent);
+        if(!storage.loadRepeat()) {
+            next();
+            localintent.putExtra("updateIndex", true);
+            sendBroadcast(localintent);
+        }else{
+            //decrement and then let next() increment so we remain at the same song.
+            index--;
+            next();
+            //we need not update index here as we are on the same song.
+        }
 
     }
     @Override

@@ -283,11 +283,12 @@ public class SongFragment extends Fragment implements Serializable {
                                 repeat.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        if (loop) {
-                                            loop = false;
+                                        StoreData storage = new StoreData(getActivity().getApplicationContext());
+                                        if (storage.loadRepeat()) {
+                                            storage.storeRepeat(false);
                                             repeatOn.setVisibility(View.GONE);
                                         } else {
-                                            loop = true;
+                                            storage.storeRepeat(true);
                                             repeatOn.setVisibility(View.VISIBLE);
                                         }
                                     }
