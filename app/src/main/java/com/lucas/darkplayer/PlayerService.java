@@ -15,23 +15,34 @@ package com.lucas.darkplayer;
  *        along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -71,6 +82,8 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private StoreData storage = new StoreData(this);
     boolean seek=false;
     boolean shuffled=false;
+    MediaSessionCompat mSession;
+    Notification notification;
     Intent localintent = new Intent("seekto");
     private Handler mHandler = new Handler();
     BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -239,6 +252,8 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     public void onPrepared(MediaPlayer mediaPlayer) {
         //Start playing when it's prepared
         startPlaying();
+        buildNotification();
+        startForeground(42069, notification);
 
     }
 
@@ -308,6 +323,86 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             return AudioManager.AUDIOFOCUS_REQUEST_GRANTED ==
                     audioManager.abandonAudioFocus(this);
         }
+    }
+
+    private void initMediaSession(){
+        mSession = new MediaSessionCompat(this, MEDIA_SESSION_SERVICE);
+        mSession.setCallback(new MediaSessionCompat.Callback() {
+            @Override
+            public boolean onMediaButtonEvent(@NonNull Intent mediaButtonIntent) {
+                updatePlayerStatus();
+                return super.onMediaButtonEvent(mediaButtonIntent);
+            }
+
+            @Override
+            public void onPrepare() {
+                updatePlayerStatus();
+                super.onPrepare();
+            }
+
+            @Override
+            public void onPlay() {
+                startPlaying();
+                super.onPlay();
+            }
+
+            @Override
+            public void onPause() {
+                pausePlayer();
+                super.onPause();
+            }
+
+            @Override
+            public void onSkipToNext() {
+                next();
+                super.onSkipToNext();
+            }
+
+            @Override
+            public void onSkipToPrevious() {
+                prev();
+                super.onSkipToPrevious();
+            }
+
+            @Override
+            public void onStop() {
+                stopSelf();
+                super.onStop();
+            }
+
+            @Override
+            public void onSeekTo(long pos) {
+                super.onSeekTo(pos);
+            }
+        });
+        mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        PlaybackStateCompat state = new PlaybackStateCompat.Builder()
+                .setActions(
+                        PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE | PlaybackState.ACTION_SEEK_TO | PlaybackState.ACTION_SKIP_TO_NEXT | PlaybackState.ACTION_SKIP_TO_PREVIOUS)
+                .build();
+        if(!mSession.isActive()){
+            mSession.setActive(true);
+        }
+        mSession.setPlaybackState(state);
+    }
+
+    private void buildNotification(){
+        Uri imageUri = audioList.get(shuffleList[index]).getAlbumArt();
+        Bitmap bitmap = null;
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        notification = new NotificationCompat.Builder(this, "com.lucas.darkplayer.MYFUCKINGNOTIFICATION")
+                .setSmallIcon(android.R.drawable.ic_media_play)
+                .setContentTitle(audioList.get(shuffleList[index]).getTitle())
+                .setContentText(audioList.get(shuffleList[index]).getArtist())
+                .setLargeIcon(bitmap)
+                .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
+                        .setMediaSession(mSession.getSessionToken()))
+                .build();
+
     }
 
     public void next() {
@@ -434,6 +529,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
 
         if (mediaFile != null && mediaFile != "")
             initMediaPlayer();
+            initMediaSession();
 
         return super.onStartCommand(intent, flags, startId);
     }
