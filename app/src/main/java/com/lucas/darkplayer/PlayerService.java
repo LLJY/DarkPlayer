@@ -62,7 +62,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private TelephonyManager telephonyManager;
     private String mediaFile;
     private AudioManager audioManager;
-    private PlaybackStatus pStatus = PlaybackStatus.STOPPED;
+    public PlaybackStatus pStatus = PlaybackStatus.STOPPED;
     public int resumePosition;
     public int[] shuffleList;
     private ArrayList<SongData> audioList;
@@ -127,7 +127,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             localintent.putExtra("updateIndex", true);
             sendBroadcast(localintent);
             pStatus=PlaybackStatus.PLAYING;
-            updatePlayerStatus(pStatus);
+            updatePlayerStatus();
             if(seek){
                 seek=false;
                 mediaPlayer.seekTo(seekTo);
@@ -139,7 +139,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
             pStatus=PlaybackStatus.STOPPED;
-            updatePlayerStatus(pStatus);
+            updatePlayerStatus();
         }
     }
     public void pausePlayer() {
@@ -147,7 +147,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             mediaPlayer.pause();
             resumePosition = mediaPlayer.getCurrentPosition();
             pStatus=PlaybackStatus.PAUSED;
-            updatePlayerStatus(pStatus);
+            updatePlayerStatus();
 
         }
     }
@@ -162,7 +162,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             mediaPlayer.setVolume(1.0f, 1.0f);
             mediaPlayer.start();
             pStatus=PlaybackStatus.PLAYING;
-            updatePlayerStatus(pStatus);
+            updatePlayerStatus();
         }
     }
     private void callStateListener() {
@@ -193,8 +193,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         telephonyManager.listen(phoneStateListener,
                 PhoneStateListener.LISTEN_CALL_STATE);
     }
-    private void updatePlayerStatus(PlaybackStatus pStatus){
-        localintent.putExtra("pStatus",pStatus);
+    private void updatePlayerStatus(){
         localintent.putExtra("updatePlayerStatus", true);
         sendBroadcast(localintent);
 

@@ -114,21 +114,8 @@ public class SongFragment extends Fragment implements Serializable {
                 nextSong();
             }
             if(updatePlayerStatus){
-                pStatus=(PlaybackStatus)intent.getSerializableExtra("pStatus");
-                switch(pStatus){
-                    case PAUSED:
-                        playPause.setImageResource(R.drawable.play);
-                        playPause2.setImageResource(R.drawable.play);
-                        break;
-                    case PLAYING:
-                        playPause.setImageResource(R.drawable.pause);
-                        playPause2.setImageResource(R.drawable.pause);
-                        break;
-                    case STOPPED:
-                        playPause.setImageResource(R.drawable.play);
-                        playPause2.setImageResource(R.drawable.play);
-                        break;
-                }
+                pStatus=player.pStatus;
+                updatePlayerStatus();
             }
 
 
@@ -489,6 +476,25 @@ public class SongFragment extends Fragment implements Serializable {
         }
         onSongChange();
         getActivity().sendBroadcast(playerIntent);
+
+    }
+
+    private void updatePlayerStatus(){
+
+        switch(pStatus){
+            case PAUSED:
+                playPause.setImageResource(R.drawable.play);
+                playPause2.setImageResource(R.drawable.play);
+                break;
+            case PLAYING:
+                playPause.setImageResource(R.drawable.pause);
+                playPause2.setImageResource(R.drawable.pause);
+                break;
+            case STOPPED:
+                playPause.setImageResource(R.drawable.play);
+                playPause2.setImageResource(R.drawable.play);
+                break;
+        }
 
     }
 
