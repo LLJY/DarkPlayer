@@ -28,6 +28,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.media.session.PlaybackState;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +37,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -72,7 +74,7 @@ public class SongFragment extends Fragment implements Serializable {
     private Handler mHandler = new Handler();
     ImageView img, img2;
     int previousSong = 0;
-    public PlaybackStatus pStatus = PlaybackStatus.STOPPED;
+    public int pStatus = PlaybackStateCompat.STATE_STOPPED;
     public static PlayerService player;
     int current;
     static ArrayList<SongData> audioList;
@@ -209,7 +211,7 @@ public class SongFragment extends Fragment implements Serializable {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                if(pStatus==PlaybackStatus.PLAYING){
+                if(pStatus==PlaybackState.STATE_PLAYING){
                     current = songStat.getProgress();
                     player.mediaPlayer.seekTo(current);
                     player.resumePosition = current;
@@ -491,15 +493,15 @@ public class SongFragment extends Fragment implements Serializable {
     private void updatePlayerStatus(){
 
         switch(pStatus){
-            case PAUSED:
+            case PlaybackState.STATE_PAUSED:
                 playPause.setImageResource(R.drawable.play);
                 playPause2.setImageResource(R.drawable.play);
                 break;
-            case PLAYING:
+            case PlaybackState.STATE_PLAYING:
                 playPause.setImageResource(R.drawable.pause);
                 playPause2.setImageResource(R.drawable.pause);
                 break;
-            case STOPPED:
+            case PlaybackState.STATE_STOPPED:
                 playPause.setImageResource(R.drawable.play);
                 playPause2.setImageResource(R.drawable.play);
                 break;
@@ -520,14 +522,14 @@ public class SongFragment extends Fragment implements Serializable {
 
     private void setPlayerStatus(boolean skip) {
         switch (pStatus) {
-            case PAUSED:
+            case PlaybackState.STATE_PAUSED:
                 if (skip) {
                     playAudio(true);
                 } else {
                     player.resumePlayer();
                 }
                 break;
-            case PLAYING:
+            case PlaybackState.STATE_PLAYING:
                 if (skip) {
                     player.reset();
                     playAudio(true);
@@ -535,14 +537,14 @@ public class SongFragment extends Fragment implements Serializable {
                     player.pausePlayer();
                 }
                 break;
-            case STOPPED:
+            case PlaybackState.STATE_STOPPED:
                 startService(audioList, songInList);
                 break;
         }
     }
 
     public void nextSong() {
-        if(pStatus == PlaybackStatus.PLAYING) {
+        if(pStatus == PlaybackState.STATE_PLAYING) {
             player.next();
         }else{
             songInList++;
@@ -551,7 +553,7 @@ public class SongFragment extends Fragment implements Serializable {
     }
 
     public void prevSong() {
-        if(pStatus == PlaybackStatus.PLAYING) {
+        if(pStatus == PlaybackState.STATE_PLAYING) {
             player.prev();
         }else{
             songInList++;

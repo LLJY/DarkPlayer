@@ -73,7 +73,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private TelephonyManager telephonyManager;
     private String mediaFile;
     private AudioManager audioManager;
-    public PlaybackStatus pStatus = PlaybackStatus.STOPPED;
+    public int pStatus = PlaybackStateCompat.STATE_STOPPED;
     public int resumePosition;
     public int[] shuffleList;
     private ArrayList<SongData> audioList;
@@ -140,7 +140,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             localintent.putExtra("shuffleList", shuffleList);
             localintent.putExtra("updateIndex", true);
             sendBroadcast(localintent);
-            pStatus=PlaybackStatus.PLAYING;
+            pStatus=PlaybackState.STATE_PLAYING;
             updatePlayerStatus();
             if(seek){
                 seek=false;
@@ -152,7 +152,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     public void stopPlaying() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
-            pStatus=PlaybackStatus.STOPPED;
+            pStatus=PlaybackState.STATE_STOPPED;
             updatePlayerStatus();
         }
     }
@@ -160,7 +160,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             resumePosition = mediaPlayer.getCurrentPosition();
-            pStatus=PlaybackStatus.PAUSED;
+            pStatus=PlaybackState.STATE_PAUSED;
             updatePlayerStatus();
 
         }
@@ -175,7 +175,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             }
             mediaPlayer.setVolume(1.0f, 1.0f);
             mediaPlayer.start();
-            pStatus=PlaybackStatus.PLAYING;
+            pStatus=PlaybackState.STATE_PLAYING;
             updatePlayerStatus();
         }
     }
