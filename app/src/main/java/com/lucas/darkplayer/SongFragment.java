@@ -522,11 +522,21 @@ public class SongFragment extends Fragment implements Serializable {
     }
 
     public void nextSong() {
-        player.next();
+        if(pStatus == PlaybackStatus.PLAYING) {
+            player.next();
+        }else{
+            songInList++;
+            playAudio(true);
+        }
     }
 
     public void prevSong() {
-        player.prev();
+        if(pStatus == PlaybackStatus.PLAYING) {
+            player.prev();
+        }else{
+            songInList++;
+            playAudio(true);
+        }
     }
 
     @Override
