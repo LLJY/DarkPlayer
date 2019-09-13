@@ -557,6 +557,8 @@ public class SongFragment extends Fragment implements Serializable {
             //get songindex and stuff when fragment resumes so that we don't get weird shit
             shuffleList=player.shuffleList;
             songInList=player.index;
+            pStatus=player.pStatus;
+            updatePlayerStatus();
             onSongChange();
 
         }
