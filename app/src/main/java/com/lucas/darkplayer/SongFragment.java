@@ -459,7 +459,7 @@ public class SongFragment extends Fragment implements Serializable {
                         seekEnd.setText(time);
                     }
                 }
-                mHandler.postDelayed(this, 1000);
+                mHandler.postDelayed(this, 100);
             }
         });
     }
