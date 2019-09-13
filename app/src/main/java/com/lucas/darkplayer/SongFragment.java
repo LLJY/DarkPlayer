@@ -296,7 +296,7 @@ public class SongFragment extends Fragment implements Serializable {
                                             } else {
                                                 shuffled = false;
                                             }
-                                            songInList = sState.getInt("index");
+                                            songInList = CommonMethods.indexOf(shuffleList, sState.getInt("index"));
                                         }
                                     } catch (NullPointerException e) {
                                         e.printStackTrace();
@@ -422,13 +422,13 @@ public class SongFragment extends Fragment implements Serializable {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         if(!fromPlaylist) {
             outState.putIntArray("shuffleList", shuffleList);
             outState.putBoolean("shuffled", shuffled);
             outState.putInt("index", songInList);
             outState.putBoolean("ServiceState", serviceBound);
         }
+        super.onSaveInstanceState(outState);
 
     }
 
@@ -546,6 +546,13 @@ public class SongFragment extends Fragment implements Serializable {
             }catch(NullPointerException e){
                 e.printStackTrace();
             }
+        }
+        if(player != null && player.mediaPlayer != null){
+            //get songindex and stuff when fragment resumes so that we don't get weird shit
+            shuffleList=player.shuffleList;
+            songInList=player.index;
+            onSongChange();
+
         }
 
     }

@@ -67,7 +67,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     public int[] shuffleList;
     private ArrayList<SongData> audioList;
     int seekTo=0;
-    int index = 0;
+    public int index = 0;
     boolean seek=false;
     boolean shuffled=false;
     Intent localintent = new Intent("seekto");
@@ -126,7 +126,8 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             localintent.putExtra("shuffleList", shuffleList);
             localintent.putExtra("updateIndex", true);
             sendBroadcast(localintent);
-            updatePlayerStatus(PlaybackStatus.PLAYING);
+            pStatus=PlaybackStatus.PLAYING;
+            updatePlayerStatus(pStatus);
             if(seek){
                 seek=false;
                 mediaPlayer.seekTo(seekTo);
@@ -137,14 +138,16 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     public void stopPlaying() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
-            updatePlayerStatus(PlaybackStatus.STOPPED);
+            pStatus=PlaybackStatus.STOPPED;
+            updatePlayerStatus(pStatus);
         }
     }
     public void pausePlayer() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             resumePosition = mediaPlayer.getCurrentPosition();
-            updatePlayerStatus(PlaybackStatus.PAUSED);
+            pStatus=PlaybackStatus.PAUSED;
+            updatePlayerStatus(pStatus);
 
         }
     }
@@ -158,7 +161,8 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             }
             mediaPlayer.setVolume(1.0f, 1.0f);
             mediaPlayer.start();
-            updatePlayerStatus(PlaybackStatus.PLAYING);
+            pStatus=PlaybackStatus.PLAYING;
+            updatePlayerStatus(pStatus);
         }
     }
     private void callStateListener() {
