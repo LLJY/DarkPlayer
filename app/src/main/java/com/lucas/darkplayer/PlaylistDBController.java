@@ -82,6 +82,7 @@ public class PlaylistDBController {
             audioList.add(new Playlist(name, index, data, title, album, artist, albumArtUri));
         }
         cursor.close();
+        PlaylistDB.destroyInstance();
         return audioList;
 
     }
@@ -108,6 +109,7 @@ public class PlaylistDBController {
             }
         }
         cursor.close();
+        PlaylistDB.destroyInstance();
         return list;
     }
 
@@ -125,12 +127,14 @@ public class PlaylistDBController {
                 db.playlistDao().deletePlaylist(playlists.get(i));
             }
         }
+        PlaylistDB.destroyInstance();
     }
 
     public static void nukeDatabase(Context context) {
         PlaylistDB db;
         db = PlaylistDB.getInstance(context);
         db.playlistDao().resetPlaylist();
+        PlaylistDB.destroyInstance();
 
     }
 
