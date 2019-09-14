@@ -390,6 +390,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 public void onSeekTo(long pos) {
                     int seek = (int) pos;
                     mediaPlayer.seekTo(seek);
+                    updatePlayerstateCompat();
                     super.onSeekTo(pos);
                 }
             });
@@ -399,9 +400,11 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             mSession.setActive(true);
         }
         MediaMetadataCompat metadata = new MediaMetadataCompat.Builder()
-                .putString(MediaMetadataCompat.METADATA_KEY_DURATION, audioList.get(shuffleList[index]).getDuration())
+                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, Integer.parseInt(audioList.get(shuffleList[index]).getDuration()))
                 .build();
         mSession.setMetadata(metadata);
+
+
     }
 
     private void buildNotification(){
