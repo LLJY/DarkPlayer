@@ -404,6 +404,9 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         }catch (Exception e){
             e.printStackTrace();
         }
+        Intent intent = new Intent(this, DefaultTab.class);
+        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
         Notification notification;
         if(pStatus == PlaybackStateCompat.STATE_PLAYING) {
             notification = new NotificationCompat.Builder(this, "com.lucas.darkplayer.MYFUCKINGNOTIFICATION")
@@ -415,6 +418,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                     .addAction(android.R.drawable.ic_media_previous, "Previous", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
                     .addAction(android.R.drawable.ic_media_pause, "Pause", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE))
                     .addAction(android.R.drawable.ic_media_next, "Next", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
+                    .setContentIntent(pIntent)
                     .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
                             .setMediaSession(mSession.getSessionToken()))
                     .build();
@@ -428,6 +432,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                     .addAction(android.R.drawable.ic_media_previous, "Previous", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
                     .addAction(android.R.drawable.ic_media_play, "Pause", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE))
                     .addAction(android.R.drawable.ic_media_next, "Next", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
+                    .setContentIntent(pIntent)
                     .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
                             .setMediaSession(mSession.getSessionToken()))
                     .build();
