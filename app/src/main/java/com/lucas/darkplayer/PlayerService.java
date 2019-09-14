@@ -401,7 +401,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         }catch (Exception e){
             e.printStackTrace();
         }
-        Notification notification
+        Notification notification;
         if(pStatus == PlaybackStateCompat.STATE_PLAYING) {
             notification = new NotificationCompat.Builder(this, "com.lucas.darkplayer.MYFUCKINGNOTIFICATION")
                     .setSmallIcon(android.R.drawable.ic_media_play)
@@ -599,8 +599,8 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                         .setState(pStatus, mediaPlayer.getCurrentPosition(), 1, SystemClock.elapsedRealtime())
                         .build();
                 mSession.setPlaybackState(state);
-                mHandler.postDelayed(this, 1000);
             }
+            mHandler.postDelayed(this, 1000);
         }
     });
 
