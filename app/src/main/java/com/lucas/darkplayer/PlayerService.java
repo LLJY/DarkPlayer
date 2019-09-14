@@ -79,7 +79,6 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     public int pStatus = PlaybackStateCompat.STATE_STOPPED;
     public int resumePosition;
     PlaybackStateCompat state;
-    long elapsed = 0;
     public int[] shuffleList;
     private ArrayList<SongData> audioList;
     int seekTo=0;
@@ -114,7 +113,6 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
          * Initialises MediaPlayer and calls preparedAsync
          */
         if(mediaPlayer == null || !mediaPlayer.isPlaying()) {
-            elapsed = SystemClock.elapsedRealtime();
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setOnErrorListener(this);
             mediaPlayer.setOnPreparedListener(this);
@@ -576,7 +574,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 state = new PlaybackStateCompat.Builder()
                         .setActions(
                                 PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE | PlaybackState.ACTION_SEEK_TO | PlaybackState.ACTION_SKIP_TO_NEXT | PlaybackState.ACTION_SKIP_TO_PREVIOUS)
-                        .setState(pStatus, mediaPlayer.getCurrentPosition(), 1, elapsed)
+                        .setState(pStatus, mediaPlayer.getCurrentPosition(), 1, SystemClock.elapsedRealtime())
                         .build();
                 mSession.setPlaybackState(state);
                 mHandler.postDelayed(this, 1000);
