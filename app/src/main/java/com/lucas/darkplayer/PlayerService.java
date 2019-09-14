@@ -292,6 +292,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 Log.d("MediaPlayer Error", "ERROR: MEDIA AUDIO NOT PLAYING" + u);
                 return true;
         }
+        Log.d("MediaPlayer Error", "ERROR: UNKNOWN ERROR" + u);
         return true;
     }
 
