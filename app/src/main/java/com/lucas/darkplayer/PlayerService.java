@@ -450,6 +450,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             mediaFile = audioList.get(shuffleList[index]).getSongId();
             reset();
             initMediaPlayer();
+            buildNotification();
         }
     }
 
@@ -459,6 +460,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             mediaFile = audioList.get(shuffleList[index]).getSongId();
             reset();
             initMediaPlayer();
+            buildNotification();
         }
     }
 
@@ -608,7 +610,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             if(mediaPlayer != null) {
                updatePlayerstateCompat();
             }
-            mHandler.postDelayed(this, 1000);
+            mHandler.postDelayed(this, 100);
         }
     });
 
