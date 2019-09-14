@@ -316,7 +316,12 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
-                stopPlaying();
+                if(mediaPlayer.isPlaying()) {
+                    pausePlayer();
+                    pausedByFocus = true;
+                }else{
+                    pausedByFocus=false;
+                }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 if(mediaPlayer.isPlaying()) {
@@ -458,7 +463,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             startForeground(42069, notification);
         }else{
             notification = new NotificationCompat.Builder(this, "com.lucas.darkplayer.MYFUCKINGNOTIFICATION")
-                    .setSmallIcon(android.R.drawable.ic_media_play)
+                    .setSmallIcon(android.R.drawable.ic_media_pause)
                     .setContentTitle(audioList.get(shuffleList[index]).getTitle())
                     .setContentText(audioList.get(shuffleList[index]).getArtist())
                     .setLargeIcon(bitmap)
