@@ -113,30 +113,32 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         /*
          * Initialises MediaPlayer and calls preparedAsync
          */
-        elapsed = SystemClock.elapsedRealtime();
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setOnErrorListener(this);
-        mediaPlayer.setOnPreparedListener(this);
-        mediaPlayer.setOnCompletionListener(this);
-        mediaPlayer.setOnSeekCompleteListener(this);
-        mediaPlayer.setOnBufferingUpdateListener(this);
-        mediaPlayer.setOnInfoListener(this);
-        mediaPlayer.reset();
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        try {
-            if (mediaFile != null) {
-                mediaPlayer.setDataSource(mediaFile);
-            }else {
+        if(mediaPlayer == null || !mediaPlayer.isPlaying()) {
+            elapsed = SystemClock.elapsedRealtime();
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setOnErrorListener(this);
+            mediaPlayer.setOnPreparedListener(this);
+            mediaPlayer.setOnCompletionListener(this);
+            mediaPlayer.setOnSeekCompleteListener(this);
+            mediaPlayer.setOnBufferingUpdateListener(this);
+            mediaPlayer.setOnInfoListener(this);
+            mediaPlayer.reset();
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            try {
+                if (mediaFile != null) {
+                    mediaPlayer.setDataSource(mediaFile);
+                } else {
+                    stopSelf();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
                 stopSelf();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            stopSelf();
-        }
-        try {
-            mediaPlayer.prepareAsync();
-        }catch(Exception e){
-            stopSelf();
+            try {
+                mediaPlayer.prepareAsync();
+            } catch (Exception e) {
+                stopSelf();
+            }
         }
     }
     private void startPlaying() {
