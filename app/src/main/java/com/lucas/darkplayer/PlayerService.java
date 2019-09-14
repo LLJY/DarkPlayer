@@ -457,8 +457,12 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                     .addAction(android.R.drawable.ic_media_pause, "Pause", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE))
                     .addAction(android.R.drawable.ic_media_next, "Next", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
                     .setContentIntent(clickPIntent)
+                    .setShowWhen(false)
+                    .setSubText(audioList.get(shuffleList[index]).getAlbum())
                     .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
-                            .setMediaSession(mSession.getSessionToken()))
+                            .setMediaSession(mSession.getSessionToken())
+                            .setShowActionsInCompactView(0,1,2)
+                            .setShowCancelButton(true))
                     .build();
             startForeground(42069, notification);
         }else{
@@ -472,10 +476,14 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                     .addAction(android.R.drawable.ic_media_play, "Pause", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE))
                     .addAction(android.R.drawable.ic_media_next, "Next", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
                     .setContentIntent(clickPIntent)
+                    .setShowWhen(false)
+                    .setSubText(audioList.get(shuffleList[index]).getAlbum())
                     //only set delete intent when song is paused.
                     .setDeleteIntent(stopPIntent)
                     .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
-                            .setMediaSession(mSession.getSessionToken()))
+                            .setMediaSession(mSession.getSessionToken())
+                            .setShowActionsInCompactView(0,1,2)
+                            .setShowCancelButton(true))
                     .build();
             startForeground(42069, notification);
             stopForeground(false);

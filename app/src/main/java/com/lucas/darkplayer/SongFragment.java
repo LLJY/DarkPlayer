@@ -37,7 +37,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -55,12 +54,11 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-
 public class SongFragment extends Fragment implements Serializable {
     RecyclerView recyclerView;
     SeekBar songStat;
     static int[] shuffleList;
-    boolean permissionGranted, shuffled=false, loop=false, changeOnShuffle, fromPlaylist=false, shakeToShuffle, serviceBound=false;
+    boolean permissionGranted, shuffled=false, fromPlaylist=false, shakeToShuffle, serviceBound=false;
     //initialise variables
     RecyclerAdapter adapter;
     ImageButton playPause, playPause2, shuffle, repeat;
@@ -70,7 +68,6 @@ public class SongFragment extends Fragment implements Serializable {
     String playlistName;
     private SensorManager mSensorManager;
     private ShakeListener mSensorListener;
-    private SlidingPaneLayout mLayout;
     private Handler mHandler = new Handler();
     ImageView img, img2;
     int previousSong = 0;
