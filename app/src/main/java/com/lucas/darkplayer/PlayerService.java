@@ -87,7 +87,6 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     boolean seek=false;
     boolean shuffled=false;
     MediaSessionCompat mSession;
-    Notification notification;
     Intent localintent = new Intent("seekto");
     private Handler mHandler = new Handler();
     BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -153,6 +152,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 mediaPlayer.seekTo(seekTo);
             }
             mediaPlayer.setVolume(1.0f, 1.0f);
+            buildNotification();
         }
     }
     public void stopPlaying() {
@@ -168,6 +168,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             resumePosition = mediaPlayer.getCurrentPosition();
             pStatus=PlaybackState.STATE_PAUSED;
             updatePlayerStatus();
+            buildNotification();
 
         }
     }
@@ -183,6 +184,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             mediaPlayer.start();
             pStatus=PlaybackState.STATE_PLAYING;
             updatePlayerStatus();
+            buildNotification();
         }
     }
     private void callStateListener() {
@@ -258,8 +260,6 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     public void onPrepared(MediaPlayer mediaPlayer) {
         //Start playing when it's prepared
         startPlaying();
-        buildNotification();
-        startForeground(42069, notification);
 
     }
 
@@ -401,18 +401,35 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         }catch (Exception e){
             e.printStackTrace();
         }
-        notification = new NotificationCompat.Builder(this, "com.lucas.darkplayer.MYFUCKINGNOTIFICATION")
-                .setSmallIcon(android.R.drawable.ic_media_play)
-                .setContentTitle(audioList.get(shuffleList[index]).getTitle())
-                .setContentText(audioList.get(shuffleList[index]).getArtist())
-                .setLargeIcon(bitmap)
-                .setOngoing(true)
-                .addAction(android.R.drawable.ic_media_previous, "Previous",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
-                .addAction(android.R.drawable.ic_media_pause, "Pause",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE))
-                .addAction(android.R.drawable.ic_media_next, "Next",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
-                .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
-                        .setMediaSession(mSession.getSessionToken()))
-                .build();
+        Notification notification
+        if(pStatus == PlaybackStateCompat.STATE_PLAYING) {
+            notification = new NotificationCompat.Builder(this, "com.lucas.darkplayer.MYFUCKINGNOTIFICATION")
+                    .setSmallIcon(android.R.drawable.ic_media_play)
+                    .setContentTitle(audioList.get(shuffleList[index]).getTitle())
+                    .setContentText(audioList.get(shuffleList[index]).getArtist())
+                    .setLargeIcon(bitmap)
+                    .setOngoing(true)
+                    .addAction(android.R.drawable.ic_media_previous, "Previous", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
+                    .addAction(android.R.drawable.ic_media_pause, "Pause", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE))
+                    .addAction(android.R.drawable.ic_media_next, "Next", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
+                    .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
+                            .setMediaSession(mSession.getSessionToken()))
+                    .build();
+        }else{
+            notification = new NotificationCompat.Builder(this, "com.lucas.darkplayer.MYFUCKINGNOTIFICATION")
+                    .setSmallIcon(android.R.drawable.ic_media_play)
+                    .setContentTitle(audioList.get(shuffleList[index]).getTitle())
+                    .setContentText(audioList.get(shuffleList[index]).getArtist())
+                    .setLargeIcon(bitmap)
+                    .setOngoing(true)
+                    .addAction(android.R.drawable.ic_media_previous, "Previous", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
+                    .addAction(android.R.drawable.ic_media_play, "Pause", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE))
+                    .addAction(android.R.drawable.ic_media_next, "Next", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
+                    .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
+                            .setMediaSession(mSession.getSessionToken()))
+                    .build();
+        }
+        startForeground(42069, notification);
 
     }
 
