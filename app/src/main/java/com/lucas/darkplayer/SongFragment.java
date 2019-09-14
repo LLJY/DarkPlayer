@@ -74,7 +74,6 @@ public class SongFragment extends Fragment implements Serializable {
     private Handler mHandler = new Handler();
     ImageView img, img2;
     int previousSong = 0;
-    public int pStatus = PlaybackStateCompat.STATE_STOPPED;
     public static PlayerService player;
     int current;
     static ArrayList<SongData> audioList;
@@ -107,7 +106,6 @@ public class SongFragment extends Fragment implements Serializable {
                 onSongChange(previousSong);
             }
             if(updatePlayerStatus){
-                pStatus=player.pStatus;
                 updatePlayerStatus();
             }
 
@@ -210,7 +208,7 @@ public class SongFragment extends Fragment implements Serializable {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                if(pStatus==PlaybackState.STATE_PLAYING){
+                if(player.pStatus==PlaybackState.STATE_PLAYING){
                     current = songStat.getProgress();
                     player.mediaPlayer.seekTo(current);
                     player.resumePosition = current;
@@ -493,7 +491,7 @@ public class SongFragment extends Fragment implements Serializable {
 
     private void updatePlayerStatus(){
 
-        switch(pStatus){
+        switch(player.pStatus){
             case PlaybackState.STATE_PAUSED:
                 playPause.setImageResource(R.drawable.play);
                 playPause2.setImageResource(R.drawable.play);
@@ -522,7 +520,7 @@ public class SongFragment extends Fragment implements Serializable {
     }
 
     private void setPlayerStatus(boolean skip) {
-        switch (pStatus) {
+        switch (player.pStatus) {
             case PlaybackState.STATE_PAUSED:
                 if (skip) {
                     playAudio(true);
@@ -545,7 +543,7 @@ public class SongFragment extends Fragment implements Serializable {
     }
 
     public void nextSong() {
-        if(pStatus == PlaybackState.STATE_PLAYING) {
+        if(player.pStatus == PlaybackState.STATE_PLAYING) {
             player.next();
         }else{
             songInList++;
@@ -554,7 +552,7 @@ public class SongFragment extends Fragment implements Serializable {
     }
 
     public void prevSong() {
-        if(pStatus == PlaybackState.STATE_PLAYING) {
+        if(player.pStatus == PlaybackState.STATE_PLAYING) {
             player.prev();
         }else{
             songInList++;
@@ -579,7 +577,6 @@ public class SongFragment extends Fragment implements Serializable {
             //get songindex and stuff when fragment resumes so that we don't get weird shit
             shuffleList=player.shuffleList;
             songInList=player.index;
-            pStatus=player.pStatus;
             updatePlayerStatus();
             onSongChange(previousSong);
 
