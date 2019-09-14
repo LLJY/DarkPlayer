@@ -555,7 +555,7 @@ public class SongFragment extends Fragment implements Serializable {
         if(player.pStatus == PlaybackState.STATE_PLAYING) {
             player.prev();
         }else{
-            songInList++;
+            songInList--;
             playAudio(true);
         }
     }
