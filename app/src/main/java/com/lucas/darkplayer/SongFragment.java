@@ -83,7 +83,6 @@ public class SongFragment extends Fragment implements Serializable {
         public void onServiceConnected(ComponentName name, IBinder service) {
             PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
             player = binder.getService();
-            Toast.makeText(getActivity(), "Service Bound!", Toast.LENGTH_LONG).show();
             serviceBound = true;
         }
 
