@@ -155,7 +155,7 @@ public class SongFragment extends Fragment implements Serializable {
         }
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         //set ID's for ui elements
-        shakeToShuffle = prefs.getBoolean("shakeToShuffle", false);
+        shakeToShuffle = prefs.getBoolean("sts", false);
         img = view.findViewById(R.id.albumArtBig);
         img2 = view.findViewById(R.id.albumArtTop);
         song = view.findViewById(R.id.title);
@@ -318,7 +318,7 @@ public class SongFragment extends Fragment implements Serializable {
                                 mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
                                 mSensorListener = new ShakeListener();
                                 mSensorListener.setOnShakeListener(new ShakeListener.OnShakeListener() {
-
+                                    @Override
                                     public void onShake() {
                                         if (shakeToShuffle && !shuffled) {
                                             //check if shake to shuffle is enabled
