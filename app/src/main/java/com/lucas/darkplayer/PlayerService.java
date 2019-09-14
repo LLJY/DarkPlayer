@@ -218,6 +218,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     private void updatePlayerStatus(){
         localintent.putExtra("updatePlayerStatus", true);
         sendBroadcast(localintent);
+        updatePlayerstateCompat();
 
     }
 
