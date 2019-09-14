@@ -390,6 +390,8 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 public void onSeekTo(long pos) {
                     int seek = (int) pos;
                     mediaPlayer.seekTo(seek);
+                    //update resume position so it doesn't jump back when it starts playing.
+                    resumePosition=seek;
                     updatePlayerstateCompat();
                     super.onSeekTo(pos);
                 }

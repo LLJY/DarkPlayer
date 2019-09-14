@@ -208,10 +208,10 @@ public class SongFragment extends Fragment implements Serializable {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                if(player.pStatus==PlaybackState.STATE_PLAYING){
+                if(player.pStatus!=PlaybackState.STATE_STOPPED){
                     current = songStat.getProgress();
-                    player.mediaPlayer.seekTo(current);
                     player.resumePosition = current;
+                    player.mediaPlayer.seekTo(current);
                 }
             }
         });
