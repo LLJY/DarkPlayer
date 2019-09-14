@@ -97,6 +97,8 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             //unlike the mess of what we did previously, service and ui should communicate via broadcasts
             //and not by calling methods and variables directly from each other as we did previously.
             boolean updateIndex=intent.getBooleanExtra("updateIndex",false);
+            //handle delete intent
+            boolean stopService = intent.getBooleanExtra("kill", false);
             if(updateIndex){
                 //if index has changed in ui, update it in service
                 //basically this happens when the user selects a song from rV.
@@ -106,6 +108,12 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 reset();
                 mediaFile=audioList.get(shuffleList[index]).getSongId();
                 initMediaPlayer();
+            }
+            if(stopService){
+                //stop mediaplayer
+                stopPlaying();
+                //stop service
+                stopSelf();
             }
         }
     };
@@ -417,9 +425,14 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         }catch (Exception e){
             e.printStackTrace();
         }
-        Intent intent = new Intent(this, DefaultTab.class);
-        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent,
+        //intent to launch app when notification is clicked
+        Intent clickIntent = new Intent(this, DefaultTab.class);
+        PendingIntent clickPIntent = PendingIntent.getActivity(this, 0, clickIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
+        //intent to kill service when notification is cleared
+        Intent stopIntent = new Intent(this, PlayerService.class);
+        stopIntent.putExtra("kill", true);
+        PendingIntent stopPIntent = PendingIntent.getBroadcast(this, 0, stopIntent,0 );
         Notification notification;
         if(pStatus == PlaybackStateCompat.STATE_PLAYING) {
             notification = new NotificationCompat.Builder(this, "com.lucas.darkplayer.MYFUCKINGNOTIFICATION")
@@ -431,26 +444,30 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                     .addAction(android.R.drawable.ic_media_previous, "Previous", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
                     .addAction(android.R.drawable.ic_media_pause, "Pause", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE))
                     .addAction(android.R.drawable.ic_media_next, "Next", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
-                    .setContentIntent(pIntent)
+                    .setContentIntent(clickPIntent)
                     .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
                             .setMediaSession(mSession.getSessionToken()))
                     .build();
+            startForeground(42069, notification);
         }else{
             notification = new NotificationCompat.Builder(this, "com.lucas.darkplayer.MYFUCKINGNOTIFICATION")
                     .setSmallIcon(android.R.drawable.ic_media_play)
                     .setContentTitle(audioList.get(shuffleList[index]).getTitle())
                     .setContentText(audioList.get(shuffleList[index]).getArtist())
                     .setLargeIcon(bitmap)
-                    .setOngoing(true)
+                    .setOngoing(false)
                     .addAction(android.R.drawable.ic_media_previous, "Previous", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
                     .addAction(android.R.drawable.ic_media_play, "Pause", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE))
                     .addAction(android.R.drawable.ic_media_next, "Next", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
-                    .setContentIntent(pIntent)
+                    .setContentIntent(clickPIntent)
+                    //only set delete intent when song is paused.
+                    .setDeleteIntent(stopPIntent)
                     .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
                             .setMediaSession(mSession.getSessionToken()))
                     .build();
+            startForeground(42069, notification);
+            stopForeground(false);
         }
-        startForeground(42069, notification);
 
     }
 
