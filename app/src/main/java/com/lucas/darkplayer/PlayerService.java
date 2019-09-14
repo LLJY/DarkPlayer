@@ -565,8 +565,10 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             initMediaPlayer();
             initMediaSession();
             try {
-                t.start();
-            }catch (IllegalThreadStateException e){
+                if(!t.isAlive()) {
+                    t.start();
+                }
+            } catch (IllegalThreadStateException e) {
                 e.printStackTrace();
             }
         return super.onStartCommand(intent, flags, startId);
