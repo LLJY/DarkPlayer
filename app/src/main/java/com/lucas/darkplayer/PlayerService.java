@@ -404,9 +404,9 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 .setContentTitle(audioList.get(shuffleList[index]).getTitle())
                 .setContentText(audioList.get(shuffleList[index]).getArtist())
                 .setLargeIcon(bitmap)
-                //.addAction(android.R.drawable.ic_media_previous, "Previous",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
-                //.addAction(android.R.drawable.ic_media_pause, "Pause",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PAUSE))
-                //.addAction(android.R.drawable.ic_media_next, "Next",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
+                .addAction(android.R.drawable.ic_media_previous, "Previous",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
+                .addAction(android.R.drawable.ic_media_pause, "Pause",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PAUSE))
+                .addAction(android.R.drawable.ic_media_next, "Next",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
                 .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(mSession.getSessionToken()))
                 .build();
