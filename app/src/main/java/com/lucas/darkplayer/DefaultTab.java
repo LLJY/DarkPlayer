@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.TabLayout;
@@ -23,6 +24,7 @@ public class DefaultTab extends AppCompatActivity
         if (actionBar != null) {
             actionBar.hide();
         }
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         setContentView(R.layout.default_tab);
         Toolbar toolbar = findViewById(R.id.tool_bar);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
