@@ -104,7 +104,7 @@ public class SongFragment extends Fragment implements Serializable {
                 previousSong=shuffleList[songInList];
                 songInList = intent.getIntExtra("index",0);
                 shuffleList = intent.getIntArrayExtra("shuffleList");
-                onSongChange();
+                onSongChange(previousSong);
             }
             if(updatePlayerStatus){
                 pStatus=player.pStatus;
@@ -342,6 +342,7 @@ public class SongFragment extends Fragment implements Serializable {
                                             public void onItemClick(View view, int position) {
                                                 //store prev to update item so that playing button is shown
                                                 previousSong = shuffleList[songInList];
+                                                onSongChange(previousSong);
                                                 if (CommonMethods.indexOf(shuffleList, position) != -1)
                                                     songInList = CommonMethods.indexOf(shuffleList, position);
                                                 setPlayerStatus(true);
@@ -360,7 +361,8 @@ public class SongFragment extends Fragment implements Serializable {
                                 adapter = new RecyclerAdapter(audioList, getActivity());
                                 recyclerView.setAdapter(adapter);
                                 recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                                onSongChange();
+                                //set first song
+                                onSongChange(previousSong);
                             } else {
                                 recyclerView.setVisibility(View.GONE);
                                 noSongs.setVisibility(View.VISIBLE);
@@ -484,7 +486,7 @@ public class SongFragment extends Fragment implements Serializable {
             playerIntent.putExtra("updateIndex", true);
             playerIntent.putExtra("shuffleList", shuffleList);
         }
-        onSongChange();
+        onSongChange(previousSong);
         getActivity().sendBroadcast(playerIntent);
 
     }
@@ -508,10 +510,10 @@ public class SongFragment extends Fragment implements Serializable {
 
     }
 
-    public void onSongChange() {
+    public void onSongChange(int prev) {
         if (adapter != null) {
             adapter.notifyItemChanged(shuffleList[songInList]);
-            adapter.notifyItemChanged(previousSong);
+            adapter.notifyItemChanged(prev);
         }
         img.setImageURI(audioList.get(shuffleList[songInList]).getAlbumArt());
         img2.setImageURI(audioList.get(shuffleList[songInList]).getAlbumArt());
@@ -579,7 +581,7 @@ public class SongFragment extends Fragment implements Serializable {
             songInList=player.index;
             pStatus=player.pStatus;
             updatePlayerStatus();
-            onSongChange();
+            onSongChange(previousSong);
 
         }
 
