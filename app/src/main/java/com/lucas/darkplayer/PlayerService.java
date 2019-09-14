@@ -44,6 +44,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -111,7 +112,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         /*
          * Initialises MediaPlayer and calls preparedAsync
          */
-        if(mediaPlayer == null || !mediaPlayer.isPlaying() && pStatus != PlaybackStateCompat.STATE_PAUSED ) {
+        if(mediaPlayer == null || !mediaPlayer.isPlaying()) {
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setOnErrorListener(this);
             mediaPlayer.setOnPreparedListener(this);
@@ -573,10 +574,28 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             //Could not gain focus
             stopSelf();
         }
-
+        boolean playPausePressed = false;
+        //get keypress from media buttons
+        String intentAction = intent.getAction();
+        if(intentAction != null && intentAction.equals(intent.ACTION_MEDIA_BUTTON)){
+            KeyEvent event = (KeyEvent)intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+            if(event != null){
+                int action = event.getAction();
+                Log.d("MediaPlayer Error", Integer.toString(action));
+                if (action == KeyEvent.ACTION_DOWN) {
+                    //do not initmediaplayer for ANY buttons pressed.
+                    //let the functions handle that afterwards
+                    playPausePressed = true;
+                }
+            }
+        }
         if (mediaFile != null && mediaFile != "")
-            initMediaPlayer();
-            initMediaSession();
+            if(!playPausePressed) {
+                //do not init mediaplayer when pause is pressed
+                // hack workaround
+                initMediaPlayer();
+                initMediaSession();
+            }
             try {
                 if(!t.isAlive()) {
                     t.start();
