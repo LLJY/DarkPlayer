@@ -58,7 +58,8 @@ public class PlaylistDBController {
             String album = cursor.getString(cursor.getColumnIndex("album"));
             String artist = cursor.getString(cursor.getColumnIndex("artist"));
             String albumArtUri = cursor.getString(cursor.getColumnIndex("album_art"));
-            audioList.add(new SongData(data, title, album, artist, albumArtUri));
+            String duration = cursor.getString(cursor.getColumnIndex("duration"));
+            audioList.add(new SongData(data, title, album, artist, albumArtUri, duration));
         }
         cursor.close();
         return audioList;
@@ -99,10 +100,11 @@ public class PlaylistDBController {
                 String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
                 String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
                 Long albumId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+                String duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
                 Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
                 Uri albumUri = ContentUris.withAppendedId(sArtworkUri, albumId);
                 String albumArtUri = albumUri.toString();
-                list.add(new SongData(data, title, album, artist, albumArtUri));
+                list.add(new SongData(data, title, album, artist, albumArtUri, duration));
             }
         }
         cursor.close();

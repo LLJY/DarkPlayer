@@ -40,6 +40,8 @@ public class Playlist {
     //use String in database for consistency
     @ColumnInfo(name = "album_art")
     private String albumArt;
+    @ColumnInfo(name = "duration")
+    private String duration;
 
     public Playlist(String playlistName, int index, String songId, String title, String album, String artist, String albumArt){
         this.playlistName = playlistName;
@@ -49,6 +51,7 @@ public class Playlist {
         this.album = album;
         this.artist = artist;
         this.albumArt = albumArt;
+        this.duration = duration;
 
     }
     public String getSongId() {
@@ -89,6 +92,14 @@ public class Playlist {
 
     public String getAlbumArt() {
         return albumArt;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public String getDuration(){
+        return duration;
     }
 
 }

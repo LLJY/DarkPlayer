@@ -23,14 +23,15 @@ public class SongData implements Serializable {
     private String title;
     private String album;
     private String artist;
-    //private Uri songUrl;
+    private String duration;
 
-    public SongData(String songId, String title, String album, String artist, String albumArt) {
+    public SongData(String songId, String title, String album, String artist, String albumArt, String duration) {
         this.songId = songId;
         this.title = title;
         this.album = album;
         this.artist = artist;
         this.albumArt = albumArt;
+        this.duration = duration;
 
     }
 
@@ -40,6 +41,14 @@ public class SongData implements Serializable {
 
     public void setSongId(String songId) {
         this.songId = songId;
+    }
+
+    public void setDuration(String duration){
+        this.duration=duration;
+    }
+
+    public String getDuration(){
+        return duration;
     }
 
     public String getTitle() {
