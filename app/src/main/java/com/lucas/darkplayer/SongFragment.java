@@ -58,7 +58,7 @@ public class SongFragment extends Fragment implements Serializable {
     RecyclerView recyclerView;
     SeekBar songStat;
     static int[] shuffleList;
-    boolean permissionGranted, shuffled=false, fromPlaylist=false, shakeToShuffle, serviceBound=false;
+    boolean permissionGranted, shuffled=false, fromPlaylist=false, shakeToShuffle, serviceBound=false, loop=false;
     //initialise variables
     RecyclerAdapter adapter;
     ImageButton playPause, playPause2, shuffle, repeat;
@@ -153,6 +153,7 @@ public class SongFragment extends Fragment implements Serializable {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         //set ID's for ui elements
         shakeToShuffle = prefs.getBoolean("sts", false);
+        loop = prefs.getBoolean("sts", false);
         img = view.findViewById(R.id.albumArtBig);
         img2 = view.findViewById(R.id.albumArtTop);
         song = view.findViewById(R.id.title);
@@ -170,6 +171,7 @@ public class SongFragment extends Fragment implements Serializable {
         final ImageButton next = view.findViewById(R.id.button);
         repeat = view.findViewById(R.id.loop);
         shuffle = view.findViewById(R.id.shuffle);
+
         /*
          *
          */
@@ -257,6 +259,14 @@ public class SongFragment extends Fragment implements Serializable {
                     @Override
                     public void run() {
                         audioList = a;
+                        //initialize sharedprefs
+                        final StoreData storage = new StoreData(getActivity().getApplicationContext());
+                        //set repeat on or off depending on value in sharedprefs
+                        if(storage.loadRepeat()){
+                            repeatOn.setVisibility(View.VISIBLE);
+                        }else{
+                            repeatOn.setVisibility(View.GONE);
+                        }
                         if (!getActivity().isFinishing()) {
                             if (permissionGranted && a != null && a.size() != 0 ) {
                                 if (fromPlaylist) {
@@ -283,7 +293,6 @@ public class SongFragment extends Fragment implements Serializable {
                                 repeat.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        StoreData storage = new StoreData(getActivity().getApplicationContext());
                                         if (storage.loadRepeat()) {
                                             storage.storeRepeat(false);
                                             repeatOn.setVisibility(View.GONE);
