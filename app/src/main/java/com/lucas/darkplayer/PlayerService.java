@@ -47,7 +47,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -74,6 +73,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     public MediaPlayer mediaPlayer;
     private boolean changeOnShuffle;
     private boolean ongoingCall = false;
+    private boolean pausedByFocus = false;
     private PhoneStateListener phoneStateListener;
     private TelephonyManager telephonyManager;
     private String mediaFile;
@@ -180,7 +180,6 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             pStatus=PlaybackState.STATE_PAUSED;
             updatePlayerStatus();
             buildNotification();
-
         }
     }
     public void resumePlayer() {
@@ -311,13 +310,21 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     public void onAudioFocusChange(int status) {
         switch (status) {
             case AudioManager.AUDIOFOCUS_GAIN:
-                resumePlayer();
+                if(pausedByFocus) {
+                    pausedByFocus = false;
+                    resumePlayer();
+                }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
-                pausePlayer();
+                stopPlaying();
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                pausePlayer();
+                if(mediaPlayer.isPlaying()) {
+                    pausePlayer();
+                    pausedByFocus = true;
+                }else{
+                    pausedByFocus=false;
+                }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                 if(mediaPlayer.isPlaying()) mediaPlayer.setVolume(0.1f,0.1f);
