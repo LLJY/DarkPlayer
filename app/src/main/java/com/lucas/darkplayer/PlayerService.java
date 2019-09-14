@@ -38,6 +38,7 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -335,65 +336,71 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     }
 
     private void initMediaSession(){
-        mSession = new MediaSessionCompat(this, MEDIA_SESSION_SERVICE);
-        mSession.setCallback(new MediaSessionCompat.Callback() {
-            @Override
-            public boolean onMediaButtonEvent(@NonNull Intent mediaButtonIntent) {
-                updatePlayerStatus();
-                return super.onMediaButtonEvent(mediaButtonIntent);
-            }
-
-            @Override
-            public void onPrepare() {
-                updatePlayerStatus();
-                super.onPrepare();
-            }
-
-            @Override
-            public void onPlay() {
-                if(pStatus == PlaybackStateCompat.STATE_PAUSED){
-                    resumePlayer();
-                }else {
-                    startPlaying();
+        if(mSession == null) {
+            mSession = new MediaSessionCompat(this, MEDIA_SESSION_SERVICE);
+            mSession.setCallback(new MediaSessionCompat.Callback() {
+                @Override
+                public boolean onMediaButtonEvent(@NonNull Intent mediaButtonIntent) {
+                    updatePlayerStatus();
+                    return super.onMediaButtonEvent(mediaButtonIntent);
                 }
-                super.onPlay();
-            }
 
-            @Override
-            public void onPause() {
-                pausePlayer();
-                super.onPause();
-            }
+                @Override
+                public void onPrepare() {
+                    updatePlayerStatus();
+                    super.onPrepare();
+                }
 
-            @Override
-            public void onSkipToNext() {
-                next();
-                super.onSkipToNext();
-            }
+                @Override
+                public void onPlay() {
+                    if (pStatus == PlaybackStateCompat.STATE_PAUSED) {
+                        resumePlayer();
+                    } else {
+                        startPlaying();
+                    }
+                    super.onPlay();
+                }
 
-            @Override
-            public void onSkipToPrevious() {
-                prev();
-                super.onSkipToPrevious();
-            }
+                @Override
+                public void onPause() {
+                    pausePlayer();
+                    super.onPause();
+                }
 
-            @Override
-            public void onStop() {
-                stopSelf();
-                super.onStop();
-            }
+                @Override
+                public void onSkipToNext() {
+                    next();
+                    super.onSkipToNext();
+                }
 
-            @Override
-            public void onSeekTo(long pos) {
-                int seek = (int) pos;
-                mediaPlayer.seekTo(seek);
-                super.onSeekTo(pos);
-            }
-        });
+                @Override
+                public void onSkipToPrevious() {
+                    prev();
+                    super.onSkipToPrevious();
+                }
+
+                @Override
+                public void onStop() {
+                    stopSelf();
+                    super.onStop();
+                }
+
+                @Override
+                public void onSeekTo(long pos) {
+                    int seek = (int) pos;
+                    mediaPlayer.seekTo(seek);
+                    super.onSeekTo(pos);
+                }
+            });
+        }
         mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
         if(!mSession.isActive()){
             mSession.setActive(true);
         }
+        MediaMetadataCompat metadata = new MediaMetadataCompat.Builder()
+                .putString(MediaMetadataCompat.METADATA_KEY_DURATION, audioList.get(shuffleList[index]).getDuration())
+                .build();
+        mSession.setMetadata(metadata);
     }
 
     private void buildNotification(){
