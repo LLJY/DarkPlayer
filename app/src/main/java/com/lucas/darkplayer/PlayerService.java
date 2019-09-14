@@ -112,7 +112,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         /*
          * Initialises MediaPlayer and calls preparedAsync
          */
-        if(mediaPlayer == null || !mediaPlayer.isPlaying()) {
+        if(mediaPlayer == null || !mediaPlayer.isPlaying() && pStatus != PlaybackStateCompat.STATE_PAUSED ) {
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setOnErrorListener(this);
             mediaPlayer.setOnPreparedListener(this);
@@ -348,7 +348,11 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
 
             @Override
             public void onPlay() {
-                startPlaying();
+                if(pStatus == PlaybackStateCompat.STATE_PAUSED){
+                    resumePlayer();
+                }else {
+                    startPlaying();
+                }
                 super.onPlay();
             }
 
@@ -403,7 +407,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 .setContentText(audioList.get(shuffleList[index]).getArtist())
                 .setLargeIcon(bitmap)
                 .addAction(android.R.drawable.ic_media_previous, "Previous",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
-                .addAction(android.R.drawable.ic_media_pause, "Pause",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PAUSE))
+                .addAction(android.R.drawable.ic_media_pause, "Pause",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE))
                 .addAction(android.R.drawable.ic_media_next, "Next",MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
                 .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(mSession.getSessionToken()))
@@ -573,7 +577,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             if(mediaPlayer != null) {
                 state = new PlaybackStateCompat.Builder()
                         .setActions(
-                                PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE | PlaybackState.ACTION_SEEK_TO | PlaybackState.ACTION_SKIP_TO_NEXT | PlaybackState.ACTION_SKIP_TO_PREVIOUS)
+                                PlaybackState.ACTION_PLAY_PAUSE | PlaybackState.ACTION_SEEK_TO | PlaybackState.ACTION_SKIP_TO_NEXT | PlaybackState.ACTION_SKIP_TO_PREVIOUS)
                         .setState(pStatus, mediaPlayer.getCurrentPosition(), 1, SystemClock.elapsedRealtime())
                         .build();
                 mSession.setPlaybackState(state);
