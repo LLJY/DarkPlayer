@@ -10,7 +10,7 @@
         android:id="@+id/toolbar_layout"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:background="@color/cardview_dark_background"
+        android:background="#323232"
         app:layout_constraintTop_toTopOf="parent"
         android:clickable="true"
         android:gravity="center">
@@ -69,15 +69,15 @@
         android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:background="@color/cardview_dark_background"
+        android:background="#323232"
         android:clickable="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="1.0">
 
         <ImageButton
             android:id="@+id/button2"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -88,8 +88,8 @@
         <ImageButton
             android:id="@+id/button1"
             style="?android:attr/borderlessButtonStyle"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginEnd="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/button2"
@@ -98,8 +98,8 @@
 
         <ImageButton
             android:id="@+id/button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/button2"
             android:layout_marginStart="20dp"
@@ -139,8 +139,8 @@
 
         <ImageButton
             android:id="@+id/shuffle"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:scaleType="fitXY"
             android:adjustViewBounds="true"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -152,8 +152,8 @@
 
         <ImageButton
             android:id="@+id/loop"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:scaleType="fitXY"
             android:adjustViewBounds="true"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -165,8 +165,8 @@
 
         <ImageView
             android:id="@+id/shuffle_on"
-            android:layout_width="15dp"
-            android:layout_height="15dp"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
             app:layout_constraintBottom_toBottomOf="@+id/shuffle"
             app:layout_constraintEnd_toEndOf="@+id/shuffle"
             app:layout_constraintStart_toStartOf="@+id/shuffle"
@@ -174,8 +174,8 @@
 
         <ImageView
             android:id="@+id/loop_on"
-            android:layout_width="15dp"
-            android:layout_height="15dp"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
             app:layout_constraintBottom_toBottomOf="@+id/loop"
             app:layout_constraintEnd_toEndOf="@+id/loop"
             app:layout_constraintStart_toStartOf="@+id/loop"

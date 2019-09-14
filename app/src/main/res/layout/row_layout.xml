@@ -27,16 +27,17 @@
             android:adjustViewBounds="true"
             android:scaleType="fitXY" />
 
-        <ImageView
-            android:id="@+id/playPause"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_alignParentRight="true"
-            android:layout_gravity="center"
-            android:layout_marginTop="2dp"
-            android:scaleType="fitXY"
-            android:visibility="visible"
-            app:srcCompat="@drawable/circle" />
+        <es.claucookie.miniequalizerlibrary.EqualizerView
+            xmlns:custom="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/equalizer_view"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="16dp"
+            android:adjustViewBounds="true"
+            custom:foregroundColor="@color/colorAccent"
+            custom:animDuration="9000"/>
 
         <TextView
             android:id="@+id/title"

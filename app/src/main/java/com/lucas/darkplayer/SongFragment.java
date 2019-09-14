@@ -70,6 +70,7 @@ public class SongFragment extends Fragment implements Serializable {
     private ShakeListener mSensorListener;
     private Handler mHandler = new Handler();
     ImageView img, img2;
+    public static PlaybackStatus pStatus = PlaybackStatus.STOPPED;
     int previousSong = 0;
     public static PlayerService player;
     int current;
@@ -501,16 +502,20 @@ public class SongFragment extends Fragment implements Serializable {
             case PlaybackState.STATE_PAUSED:
                 playPause.setImageResource(R.drawable.play);
                 playPause2.setImageResource(R.drawable.play);
+                pStatus=PlaybackStatus.PAUSED;
                 break;
             case PlaybackState.STATE_PLAYING:
                 playPause.setImageResource(R.drawable.pause);
                 playPause2.setImageResource(R.drawable.pause);
+                pStatus=PlaybackStatus.PLAYING;
                 break;
             case PlaybackState.STATE_STOPPED:
                 playPause.setImageResource(R.drawable.play);
                 playPause2.setImageResource(R.drawable.play);
+                pStatus=PlaybackStatus.STOPPED;
                 break;
         }
+        adapter.updateItem(shuffleList[songInList]);
 
     }
 

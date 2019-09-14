@@ -7,6 +7,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import es.claucookie.miniequalizerlibrary.EqualizerView;
 
 public class viewHolder extends RecyclerView.ViewHolder {
 
@@ -14,7 +15,7 @@ public class viewHolder extends RecyclerView.ViewHolder {
     TextView title;
     TextView description;
     ImageView imageView;
-    ImageView playPause;
+    EqualizerView playPause;
 
     viewHolder(View itemView) {
         super(itemView);
@@ -22,6 +23,6 @@ public class viewHolder extends RecyclerView.ViewHolder {
         title = (TextView) itemView.findViewById(R.id.title);
         description = (TextView) itemView.findViewById(R.id.artist);
         imageView = (ImageView) itemView.findViewById(R.id.imageView);
-        playPause = (ImageView) itemView.findViewById(R.id.playPause);
+        playPause = itemView.findViewById(R.id.equalizer_view);
     }
 }

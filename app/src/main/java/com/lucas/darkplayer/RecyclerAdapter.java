@@ -15,6 +15,7 @@ package com.lucas.darkplayer;
  *        along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 import android.content.Context;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,8 +53,16 @@ public class RecyclerAdapter extends RecyclerView.Adapter<viewHolder> {
         holder.imageView.setImageURI(list.get(position).getAlbumArt());
         if(SongFragment.shuffleList[SongFragment.songInList] == position) {
             holder.playPause.setVisibility(View.VISIBLE);
+            if(SongFragment.pStatus == PlaybackStatus.PLAYING) {
+                holder.playPause.animateBars();
+            }else{
+                holder.playPause.stopBars();
+            }
+            holder.imageView.setVisibility(View.INVISIBLE);
         }else{
+            holder.playPause.stopBars();
             holder.playPause.setVisibility(View.GONE);
+            holder.imageView.setVisibility(View.VISIBLE);
         }
     }
 
