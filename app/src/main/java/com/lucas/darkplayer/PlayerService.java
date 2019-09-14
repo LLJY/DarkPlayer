@@ -433,6 +433,15 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
 
     }
 
+    public void updatePlayerState(){
+        state = new PlaybackStateCompat.Builder()
+                .setActions(
+                        PlaybackState.ACTION_PLAY_PAUSE | PlaybackState.ACTION_SEEK_TO | PlaybackState.ACTION_SKIP_TO_NEXT | PlaybackState.ACTION_SKIP_TO_PREVIOUS)
+                .setState(pStatus, mediaPlayer.getCurrentPosition(), 1, SystemClock.elapsedRealtime())
+                .build();
+        mSession.setPlaybackState(state);
+    }
+
     public void next() {
         if(index<audioList.size()-1) {
             index++;
@@ -595,12 +604,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         public void run() {
             //this thread updates playbackState so that seekbar in notification works.
             if(mediaPlayer != null) {
-                state = new PlaybackStateCompat.Builder()
-                        .setActions(
-                                PlaybackState.ACTION_PLAY_PAUSE | PlaybackState.ACTION_SEEK_TO | PlaybackState.ACTION_SKIP_TO_NEXT | PlaybackState.ACTION_SKIP_TO_PREVIOUS)
-                        .setState(pStatus, mediaPlayer.getCurrentPosition(), 1, SystemClock.elapsedRealtime())
-                        .build();
-                mSession.setPlaybackState(state);
+               updatePlayerState();
             }
             mHandler.postDelayed(this, 1000);
         }
