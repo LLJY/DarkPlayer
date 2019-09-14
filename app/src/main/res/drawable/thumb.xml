@@ -5,6 +5,6 @@
         android:paddingLeft="22dp"
         android:paddingRight="22dp" />
     <size
-        android:width="12dp" />
+        android:width="8dp" />
     <solid android:color="@color/colorPrimaryDark" />
 </shape>

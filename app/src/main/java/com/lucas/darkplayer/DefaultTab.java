@@ -1,5 +1,6 @@
 package com.lucas.darkplayer;
 
+import android.app.ActionBar;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -13,6 +14,10 @@ public class DefaultTab extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
         setContentView(R.layout.default_tab);
         Toolbar toolbar = findViewById(R.id.tool_bar);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
