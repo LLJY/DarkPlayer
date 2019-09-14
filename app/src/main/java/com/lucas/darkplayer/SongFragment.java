@@ -388,7 +388,7 @@ public class SongFragment extends Fragment implements Serializable {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "Playback Notification";
             String description = "Notification for playback control";
-            int importance = NotificationManager.IMPORTANCE_HIGH;
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
             NotificationChannel channel = new NotificationChannel("com.lucas.darkplayer.MYFUCKINGNOTIFICATION", name, importance);
             channel.setDescription(description);
             // Register the channel with the system; you can't change the importance
