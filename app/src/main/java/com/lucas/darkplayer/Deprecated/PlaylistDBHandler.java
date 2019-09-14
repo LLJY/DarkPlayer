@@ -14,7 +14,7 @@ package com.lucas.darkplayer.Deprecated;
  *        You should have received a copy of the GNU General Public License
  *        along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+/*
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -127,3 +127,5 @@ public class PlaylistDBHandler extends SQLiteOpenHelper {
         db.close();
     }
 }
+
+ */
