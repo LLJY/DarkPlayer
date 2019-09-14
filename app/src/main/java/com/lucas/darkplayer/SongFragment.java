@@ -502,6 +502,7 @@ public class SongFragment extends Fragment implements Serializable {
             case PlaybackState.STATE_PAUSED:
                 playPause.setImageResource(R.drawable.play);
                 playPause2.setImageResource(R.drawable.play);
+                //we are defining pStatus solely for the purpose of updating the animated thingy for every item.
                 pStatus=PlaybackStatus.PAUSED;
                 break;
             case PlaybackState.STATE_PLAYING:
@@ -515,6 +516,7 @@ public class SongFragment extends Fragment implements Serializable {
                 pStatus=PlaybackStatus.STOPPED;
                 break;
         }
+        //update as we need the item to display whether or not it is playing.
         adapter.updateItem(shuffleList[songInList]);
 
     }
