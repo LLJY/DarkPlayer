@@ -126,6 +126,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             try {
                 if (mediaFile != null) {
                     mediaPlayer.setDataSource(mediaFile);
+                    initMediaSession();
                 } else {
                     stopSelf();
                 }
@@ -606,7 +607,6 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 //do not init mediaplayer when pause is pressed
                 // hack workaround
                 initMediaPlayer();
-                initMediaSession();
             }
             try {
                 if(!t.isAlive()) {
