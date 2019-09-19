@@ -98,7 +98,6 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             //and not by calling methods and variables directly from each other as we did previously.
             boolean updateIndex=intent.getBooleanExtra("updateIndex",false);
             //handle delete intent
-            boolean stopService = intent.getBooleanExtra("kill", false);
             if(updateIndex){
                 //if index has changed in ui, update it in service
                 //basically this happens when the user selects a song from rV.
@@ -108,12 +107,6 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
                 reset();
                 mediaFile=audioList.get(shuffleList[index]).getSongId();
                 initMediaPlayer();
-            }
-            if(stopService){
-                //stop mediaplayer
-                stopPlaying();
-                //stop service
-                stopSelf();
             }
         }
     };
@@ -444,7 +437,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         //intent to kill service when notification is cleared
         Intent stopIntent = new Intent(this, PlayerService.class);
         stopIntent.putExtra("kill", true);
-        PendingIntent stopPIntent = PendingIntent.getBroadcast(this, 0, stopIntent,0 );
+        PendingIntent stopPIntent = PendingIntent.getService(getApplicationContext(), 0, stopIntent,0 );
         Notification notification;
         if(pStatus == PlaybackStateCompat.STATE_PLAYING) {
             notification = new NotificationCompat.Builder(this, "com.lucas.darkplayer.MYFUCKINGNOTIFICATION")
@@ -576,9 +569,11 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        boolean playPausePressed = false;
         //get values from sharedprefs
         MediaButtonReceiver.handleIntent(mSession, intent);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean stopService = intent.getBooleanExtra("kill", false);
         changeOnShuffle = prefs.getBoolean("changeOnShuffle", false);
         //getting intents from SongFragment to tell PlayerService what to do.
         IntentFilter filter = new IntentFilter("player");
@@ -601,6 +596,14 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             if(shuffleList != null){
                 index = shuffleList[index];
             }
+        }
+        if(stopService){
+            //do not let it call initMediaPlayer.
+            playPausePressed=true;
+            //stop mediaplayer
+            stopPlaying();
+            //stop service
+            stopSelf();
         }
         seek = intent.getBooleanExtra("seek", false);
         seekTo = intent.getIntExtra("seekTo", 0);
@@ -629,7 +632,6 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             //Could not gain focus
             stopSelf();
         }
-        boolean playPausePressed = false;
         //get keypress from media buttons
         String intentAction = intent.getAction();
         if(intentAction != null && intentAction.equals(intent.ACTION_MEDIA_BUTTON)){

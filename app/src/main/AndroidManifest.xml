@@ -23,6 +23,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
                 <action android:name="android.media.browse.MediaBrowserService" />
+                <action android:name="myFuckingRegisteredBroadcastAreYouHappyNow" />
             </intent-filter>
         </service>
         <receiver android:name="android.support.v4.media.session.MediaButtonReceiver">
