@@ -414,8 +414,10 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         if(!mSession.isActive()){
             mSession.setActive(true);
         }
+        Bitmap bitmap = CommonMethods.uriToBitmap(audioList.get(shuffleList[index]).getAlbumArt(), this);
         MediaMetadataCompat metadata = new MediaMetadataCompat.Builder()
                 .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, Integer.parseInt(audioList.get(shuffleList[index]).getDuration()))
+                .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap)
                 .build();
         mSession.setMetadata(metadata);
 
@@ -423,13 +425,8 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     }
 
     private void buildNotification(){
-        Uri imageUri = audioList.get(shuffleList[index]).getAlbumArt();
-        Bitmap bitmap = null;
-        try {
-            bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        //convert uri to bitmap to display
+        Bitmap bitmap = CommonMethods.uriToBitmap(audioList.get(shuffleList[index]).getAlbumArt(), this);
         //intent to launch app when notification is clicked
         Intent clickIntent = new Intent(this, DefaultTab.class);
         PendingIntent clickPIntent = PendingIntent.getActivity(this, 0, clickIntent,

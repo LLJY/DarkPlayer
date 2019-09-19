@@ -1,4 +1,10 @@
 package com.lucas.darkplayer;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
+
 /*      Copyright (C) 2019  Lucas Lee Jing Yi
  *
  *        This program is free software: you can redistribute it and/or modify
@@ -25,5 +31,15 @@ public class CommonMethods {
                 return i;
         }
         return -1;
+    }
+    public static Bitmap uriToBitmap(Uri uri, Context context){
+        Bitmap bitmap = null;
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
+            return bitmap;
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
     }
 }
