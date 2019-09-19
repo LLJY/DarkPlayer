@@ -11,57 +11,62 @@
     app:umanoPanelHeight="80dp"
     app:umanoShadowHeight="5dp">
     tools:context=".SongFragment">
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/wrapper"
+    <android.support.design.card.MaterialCardView
         android:layout_width="fill_parent"
-        android:background="#242424"
-        android:elevation="4dp"
         android:layout_height="fill_parent"
-        android:layout_marginStart="18dp"
-        android:layout_marginEnd="18dp"
-        android:layout_centerHorizontal="true"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Dark"
-        android:orientation="vertical">
+        app:cardBackgroundColor="#202020"
+        android:elevation="4dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp">
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/wrapper"
+            android:layout_width="fill_parent"
+            android:background="@android:color/transparent"
+            android:layout_height="fill_parent"
+            android:layout_centerHorizontal="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:theme="@style/ThemeOverlay.MaterialComponents.Dark"
+            android:orientation="vertical">
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/recyclerView"
-                app:fastScrollEnabled="true"
-                app:fastScrollHorizontalThumbDrawable="@drawable/thumb_drawable"
-                app:fastScrollHorizontalTrackDrawable="@drawable/line_drawable"
-                app:fastScrollVerticalThumbDrawable="@drawable/thumb_drawable"
-                app:fastScrollVerticalTrackDrawable="@drawable/line_drawable"
-                android:layout_height="0dp"
-                android:layout_width="match_parent"
-                app:layout_constraintTop_toTopOf="parent"
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/recyclerView"
+                    app:fastScrollEnabled="true"
+                    app:fastScrollHorizontalThumbDrawable="@drawable/thumb_drawable"
+                    app:fastScrollHorizontalTrackDrawable="@drawable/line_drawable"
+                    app:fastScrollVerticalThumbDrawable="@drawable/thumb_drawable"
+                    app:fastScrollVerticalTrackDrawable="@drawable/line_drawable"
+                    android:layout_height="0dp"
+                    android:layout_width="match_parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_weight="1"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/no_songs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No Songs :("
+                android:textColor="@android:color/darker_gray"
+                android:textSize="36sp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_weight="1"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/no_songs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="No Songs :("
-            android:textColor="@android:color/darker_gray"
-            android:textSize="36sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/no_songs1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Check if storage permissions are enabled?"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/no_songs" />
-    </android.support.constraint.ConstraintLayout>
+            <TextView
+                android:id="@+id/no_songs1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Check if storage permissions are enabled?"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/no_songs" />
+        </android.support.constraint.ConstraintLayout>
+    </android.support.design.card.MaterialCardView>
         <RelativeLayout
             android:elevation="10dp"
             android:layout_width="match_parent"
