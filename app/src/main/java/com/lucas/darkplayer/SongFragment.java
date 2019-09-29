@@ -347,8 +347,9 @@ public class SongFragment extends Fragment implements Serializable {
                                                 //store prev to update item so that playing button is shown
                                                 previousSong = shuffleList[songInList];
                                                 onSongChange(previousSong);
-                                                if (CommonMethods.indexOf(shuffleList, position) != -1)
+                                                if (CommonMethods.indexOf(shuffleList, position) != -1) {
                                                     songInList = CommonMethods.indexOf(shuffleList, position);
+                                                }
                                                 setPlayerStatus(true);
                                             }
 
@@ -471,7 +472,7 @@ public class SongFragment extends Fragment implements Serializable {
     private void playAudio(boolean reset) {
         Intent playerIntent = new Intent("player");
         if(reset){
-            playerIntent.putExtra("index", shuffleList[songInList]);
+            playerIntent.putExtra("index", songInList);
             playerIntent.putExtra("updateIndex", true);
             playerIntent.putExtra("shuffleList", shuffleList);
         }

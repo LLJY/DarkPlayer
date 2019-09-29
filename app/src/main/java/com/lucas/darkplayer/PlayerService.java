@@ -101,9 +101,9 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             if(updateIndex){
                 //if index has changed in ui, update it in service
                 //basically this happens when the user selects a song from rV.
-                index = intent.getIntExtra("index",0);
+                int ind = intent.getIntExtra("index",0);
                 shuffleList = intent.getIntArrayExtra("shuffleList");
-                index = shuffleList[index];
+                index = ind;
                 reset();
                 mediaFile=audioList.get(shuffleList[index]).getSongId();
                 initMediaPlayer();
