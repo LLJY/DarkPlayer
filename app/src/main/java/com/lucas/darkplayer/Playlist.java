@@ -43,7 +43,7 @@ public class Playlist {
     @ColumnInfo(name = "duration")
     private String duration;
 
-    public Playlist(String playlistName, int index, String songId, String title, String album, String artist, String albumArt){
+    public Playlist(String playlistName, int index, String songId, String title, String album, String artist, String albumArt, String duration){
         this.playlistName = playlistName;
         this.index = index;
         this.songId = songId;

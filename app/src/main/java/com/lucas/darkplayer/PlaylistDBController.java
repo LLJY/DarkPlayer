@@ -79,7 +79,8 @@ public class PlaylistDBController {
             String album = cursor.getString(cursor.getColumnIndex("album"));
             String artist = cursor.getString(cursor.getColumnIndex("artist"));
             String albumArtUri = cursor.getString(cursor.getColumnIndex("album_art"));
-            audioList.add(new Playlist(name, index, data, title, album, artist, albumArtUri));
+            String duration = cursor.getString(cursor.getColumnIndex("duration"));
+            audioList.add(new Playlist(name, index, data, title, album, artist, albumArtUri, duration));
         }
         cursor.close();
         PlaylistDB.destroyInstance();

@@ -86,7 +86,7 @@ public class CreatePlaylistActivity extends AppCompatActivity {
                 }else{
                     for(int i=0; i<added.size(); i++){
                         int l = added.get(i);
-                        Playlist playlist = new Playlist(playlistName.getText().toString(),0,data.get(l).getSongId(),data.get(l).getTitle(),data.get(l).getAlbum(),data.get(l).getArtist(),data.get(l).getAlbumArt().toString());
+                        Playlist playlist = new Playlist(playlistName.getText().toString(),0,data.get(l).getSongId(),data.get(l).getTitle(),data.get(l).getAlbum(),data.get(l).getArtist(),data.get(l).getAlbumArt().toString(),data.get(l).getDuration());
                         db.playlistDao().insertPlaylist(playlist);
 
                     }
