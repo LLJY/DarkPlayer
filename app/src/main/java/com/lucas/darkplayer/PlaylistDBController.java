@@ -33,9 +33,9 @@ public class PlaylistDBController {
     public static ArrayList<PlaylistData> getPlaylists(Context context){
         ArrayList<PlaylistData> playlists = new ArrayList<>();
         ArrayList<String> name = new ArrayList<>();
-        PlaylistDB db;
-        db = PlaylistDB.getInstance(context);
-        Cursor cursor = db.playlistDao().queryPlaylists();
+        SongsDB db;
+        db = SongsDB.getInstance(context);
+        Cursor cursor = db.songsDao().queryPlaylists();
         while (cursor.moveToNext()){
             String playlist = cursor.getString(cursor.getColumnIndex("playlist_name"));
             if(!name.contains(playlist)) {
@@ -49,9 +49,9 @@ public class PlaylistDBController {
 
     public static ArrayList<SongData> getSongsFromPlaylist(Context context, String playlistName){
         ArrayList<SongData> audioList = new ArrayList<>();
-        PlaylistDB db;
-        db = PlaylistDB.getInstance(context);
-        Cursor cursor = db.playlistDao().querySongsFromPlaylist(playlistName);
+        SongsDB db;
+        db = SongsDB.getInstance(context);
+        Cursor cursor = db.songsDao().querySongsFromPlaylist(playlistName);
         while(cursor.moveToNext()){
             String data = cursor.getString(cursor.getColumnIndex("song_id"));
             String title = cursor.getString(cursor.getColumnIndex("title"));
@@ -66,11 +66,11 @@ public class PlaylistDBController {
 
     }
 
-    public static ArrayList<Playlist> getPlaylistObjects(Context context, String playlistName){
-        ArrayList<Playlist> audioList = new ArrayList<>();
-        PlaylistDB db;
-        db = PlaylistDB.getInstance(context);
-        Cursor cursor = db.playlistDao().querySongsFromPlaylist(playlistName);
+    public static ArrayList<Songs> getPlaylistObjects(Context context, String playlistName){
+        ArrayList<Songs> audioList = new ArrayList<>();
+        SongsDB db;
+        db = SongsDB.getInstance(context);
+        Cursor cursor = db.songsDao().querySongsFromPlaylist(playlistName);
         while(cursor.moveToNext()){
             String name = cursor.getString(cursor.getColumnIndex("playlist_name"));
             int index = cursor.getInt(cursor.getColumnIndex("index"));
@@ -80,10 +80,10 @@ public class PlaylistDBController {
             String artist = cursor.getString(cursor.getColumnIndex("artist"));
             String albumArtUri = cursor.getString(cursor.getColumnIndex("album_art"));
             String duration = cursor.getString(cursor.getColumnIndex("duration"));
-            audioList.add(new Playlist(name, index, data, title, album, artist, albumArtUri, duration));
+            audioList.add(new Songs(name, index, data, title, album, artist, albumArtUri, duration));
         }
         cursor.close();
-        PlaylistDB.destroyInstance();
+        SongsDB.destroyInstance();
         return audioList;
 
     }
@@ -110,7 +110,7 @@ public class PlaylistDBController {
             }
         }
         cursor.close();
-        PlaylistDB.destroyInstance();
+        SongsDB.destroyInstance();
         return list;
     }
 
@@ -119,23 +119,23 @@ public class PlaylistDBController {
     }
 
     public static void deletePlaylist(Context context, String playlistName){
-        ArrayList<Playlist> playlists =new ArrayList<>();
-        PlaylistDB db;
-        db = PlaylistDB.getInstance(context);
-        playlists = getPlaylistObjects(context, playlistName);
-        for(int i=0; i<playlists.size(); i++){
-            if(playlists.get(i).getPlaylistName().equals(playlistName)){
-                db.playlistDao().deletePlaylist(playlists.get(i));
+        ArrayList<Songs> songs =new ArrayList<>();
+        SongsDB db;
+        db = SongsDB.getInstance(context);
+        songs = getPlaylistObjects(context, playlistName);
+        for(int i = 0; i< songs.size(); i++){
+            if(songs.get(i).getPlaylistName().equals(playlistName)){
+                db.songsDao().deletePlaylist(songs.get(i));
             }
         }
-        PlaylistDB.destroyInstance();
+        SongsDB.destroyInstance();
     }
 
     public static void nukeDatabase(Context context) {
-        PlaylistDB db;
-        db = PlaylistDB.getInstance(context);
-        db.playlistDao().resetPlaylist();
-        PlaylistDB.destroyInstance();
+        SongsDB db;
+        db = SongsDB.getInstance(context);
+        db.songsDao().resetPlaylist();
+        SongsDB.destroyInstance();
 
     }
 

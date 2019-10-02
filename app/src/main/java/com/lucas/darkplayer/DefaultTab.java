@@ -32,7 +32,7 @@ public class DefaultTab extends AppCompatActivity
         setSupportActionBar(toolbar);
         TabLayout tabLayout = findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText("Songs"));
-        tabLayout.addTab(tabLayout.newTab().setText("Playlist"));
+        tabLayout.addTab(tabLayout.newTab().setText("Songs"));
         tabLayout.addTab(tabLayout.newTab().setText("Settings"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
         final ViewPager viewPager =findViewById(R.id.view_pager);

@@ -32,7 +32,7 @@ public class CreatePlaylistActivity extends AppCompatActivity {
     static ArrayList<Integer> added= new ArrayList<>();
     List<SongData> data;
     CreatePlaylistRecyclerAdapter adapter;
-    PlaylistDB db;
+    SongsDB db;
     PlaylistDBController dbc;
     PlaylistFragment pF;
     SongFragment main;
@@ -43,7 +43,7 @@ public class CreatePlaylistActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.create_playlist);
         data = PlaylistDBController.findAudio(this);
-        db = PlaylistDB.getInstance(this);
+        db = SongsDB.getInstance(this);
         try {
             pF = new PlaylistFragment();
             final RecyclerView recyclerView;
@@ -80,14 +80,14 @@ public class CreatePlaylistActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(playlistName.getText().toString().matches("")){
-                    Toast.makeText(getApplicationContext(), "Please Add Playlist Name!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Please Add Songs Name!", Toast.LENGTH_LONG).show();
                 }else if(added.isEmpty()){
-                    Toast.makeText(getApplicationContext(), "Playlist is EMPTY, Please Add Songs!!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Songs is EMPTY, Please Add Songs!!", Toast.LENGTH_LONG).show();
                 }else{
                     for(int i=0; i<added.size(); i++){
                         int l = added.get(i);
-                        Playlist playlist = new Playlist(playlistName.getText().toString(),0,data.get(l).getSongId(),data.get(l).getTitle(),data.get(l).getAlbum(),data.get(l).getArtist(),data.get(l).getAlbumArt().toString(),data.get(l).getDuration());
-                        db.playlistDao().insertPlaylist(playlist);
+                        Songs songs = new Songs(playlistName.getText().toString(),0,data.get(l).getSongId(),data.get(l).getTitle(),data.get(l).getAlbum(),data.get(l).getArtist(),data.get(l).getAlbumArt().toString(),data.get(l).getDuration());
+                        db.songsDao().insertPlaylist(songs);
 
                     }
                     onBackPressed();

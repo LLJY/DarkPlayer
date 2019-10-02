@@ -15,14 +15,14 @@ package com.lucas.darkplayer;
 *        along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-//Room database to store playlists
+//Room database to store songs
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
-@Entity(tableName = "playlists")
-public class Playlist {
+@Entity(tableName = "songs")
+public class Songs {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "index")
     private int index;
@@ -43,7 +43,7 @@ public class Playlist {
     @ColumnInfo(name = "duration")
     private String duration;
 
-    public Playlist(String playlistName, int index, String songId, String title, String album, String artist, String albumArt, String duration){
+    public Songs(String playlistName, int index, String songId, String title, String album, String artist, String albumArt, String duration){
         this.playlistName = playlistName;
         this.index = index;
         this.songId = songId;
