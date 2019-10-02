@@ -18,10 +18,15 @@ package com.lucas.darkplayer;
 //Room database to store songs
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
-@Entity(tableName = "songs")
+@Entity(foreignKeys = {
+        @ForeignKey(entity = Playlists.class,
+        parentColumns = "name",
+        childColumns = "playlist_name")},
+        tableName = "songs")
 public class Songs {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "index")

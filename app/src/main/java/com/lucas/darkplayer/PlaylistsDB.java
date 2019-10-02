@@ -20,14 +20,14 @@ import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
 @Database(entities = {Songs.class}, version = 1)
-public abstract class SongsDB extends RoomDatabase {
-    private static final String DB_NAME="songs_db";
-    private static SongsDB instance;
+public abstract class PlaylistsDB extends RoomDatabase {
+    private static final String DB_NAME="playlists_db";
+    private static PlaylistsDB instance;
     public abstract SongsDao songsDao();
 
-    public static synchronized SongsDB getInstance(Context context){
+    public static synchronized PlaylistsDB getInstance(Context context){
         if(instance==null){
-            instance= Room.databaseBuilder(context.getApplicationContext(), SongsDB.class, DB_NAME).fallbackToDestructiveMigration().allowMainThreadQueries().build();
+            instance= Room.databaseBuilder(context.getApplicationContext(), PlaylistsDB.class, DB_NAME).fallbackToDestructiveMigration().allowMainThreadQueries().build();
         }
         return instance;
     }

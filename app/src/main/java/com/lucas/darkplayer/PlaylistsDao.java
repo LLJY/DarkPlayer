@@ -8,24 +8,21 @@ import android.arch.persistence.room.Update;
 import android.database.Cursor;
 
 @Dao
-public interface SongsDao {
+public interface PlaylistsDao {
 
-    @Query("SELECT playlist_name from songs")
+    @Query("SELECT name from playlists")
     Cursor queryPlaylists();
 
-    @Query("SELECT * from Songs WHERE playlist_name like :playlistName")
-    Cursor querySongsFromPlaylist(String playlistName);
-
     @Insert()
-    void insertPlaylist(Songs songs);
+    void insertPlaylist(Playlists playlists);
 
     @Update()
-    void updatePlaylist(Songs songs);
+    void updatePlaylist(Playlists playlists);
 
     @Delete()
-    void deletePlaylist(Songs songs);
+    void deletePlaylist(Playlists playlists);
 
-    @Query("DELETE FROM Songs")
+    @Query("DELETE FROM playlists")
     void resetPlaylist();
 
 }
