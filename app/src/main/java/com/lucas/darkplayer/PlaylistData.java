@@ -19,10 +19,12 @@ import java.io.Serializable;
 public class PlaylistData implements Serializable {
     private String playlistName;
     private String albumArt;
+    private int number;
 
-    public PlaylistData(String playlistName, String albumArt){
+    public PlaylistData(String playlistName, String albumArt, int number){
         this.playlistName = playlistName;
         this.albumArt = albumArt;
+        this.number = number;
 
     }
 
@@ -32,5 +34,9 @@ public class PlaylistData implements Serializable {
 
     public String getAlbumArt() {
         return albumArt;
+    }
+
+    public int getNumberOfSongs(){
+        return number;
     }
 }

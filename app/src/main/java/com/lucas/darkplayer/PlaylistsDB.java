@@ -19,7 +19,7 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
-@Database(entities = {Playlists.class, Songs.class}, version = 2)
+@Database(entities = {Playlists.class, Songs.class}, version = 3)
 public abstract class PlaylistsDB extends RoomDatabase {
     private static final String DB_NAME="playlists_db";
     private static PlaylistsDB instance;

@@ -14,6 +14,7 @@ package com.lucas.darkplayer;
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 import android.content.Context;
+import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -49,8 +50,15 @@ public class PlaylistRecyclerAdapter extends RecyclerView.Adapter<PlaylistViewHo
     @Override
     public void onBindViewHolder(PlaylistViewHolder holder, int position) {
         holder.title.setText(list.get(position).getPlaylistName());
-        //holder.imageView.setImageURI(null);
-        //holder.imageView.setImageURI(list.get(position).getAlbumArt());
+        holder.imageView.setImageURI(null);
+        //get uri and parse it.
+        holder.imageView.setImageURI(Uri.parse(list.get(position).getAlbumArt()));
+        //plural and singular mann
+        if(list.get(position).getNumberOfSongs() == 1) {
+            holder.songNumber.setText(Integer.toString(list.get(position).getNumberOfSongs()) + " Song");
+        }else{
+            holder.songNumber.setText(Integer.toString(list.get(position).getNumberOfSongs()) + " Songs");
+        }
     }
 
     public void updateItem(int position){

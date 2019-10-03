@@ -10,12 +10,14 @@ public class PlaylistViewHolder extends RecyclerView.ViewHolder {
 
     CardView cv;
     TextView title;
+    TextView songNumber;
     ImageView imageView;
 
     PlaylistViewHolder(View itemView) {
         super(itemView);
-        cv = (CardView) itemView.findViewById(R.id.cardView);
-        title = (TextView) itemView.findViewById(R.id.playlist_name);
-        imageView = (ImageView) itemView.findViewById(R.id.imageView);
+        cv = itemView.findViewById(R.id.cardView);
+        title = itemView.findViewById(R.id.playlist_name);
+        songNumber = itemView.findViewById(R.id.playlist_number_of_songs);
+        imageView = itemView.findViewById(R.id.playlist_image);
     }
 }

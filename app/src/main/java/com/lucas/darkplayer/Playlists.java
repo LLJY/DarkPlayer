@@ -32,11 +32,14 @@ public class Playlists {
     //this is the associated album art with the playlist, will belong to the first song.
     @ColumnInfo(name = "album_art")
     private String albumArt;
+    @ColumnInfo(name = "number_of_songs")
+    private int number;
 
-    public Playlists(int id, String playlistName, String albumArt){
+    public Playlists(int id, String playlistName, String albumArt, int number){
         this.id = id;
         this.playlistName = playlistName;
         this.albumArt = albumArt;
+        this.number = number;
 
     }
 
@@ -54,6 +57,10 @@ public class Playlists {
 
     public String getPlaylistName() {
         return playlistName;
+    }
+
+    public int getNumber(){
+        return this.number;
     }
 
 }

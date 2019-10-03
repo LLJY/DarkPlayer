@@ -94,7 +94,7 @@ public class CreatePlaylistActivity extends AppCompatActivity {
                     }
                     //get the playlistname and first song's album art, then insert it into the database.
                     //pass 0 as id to tell database to autogenerate it.
-                    Playlists playlist = new Playlists(0, playlistName.getText().toString(), data.get(0).getAlbumArt().toString());
+                    Playlists playlist = new Playlists(0, playlistName.getText().toString(), data.get(added.get(0)).getAlbumArt().toString(), added.size());
                     dbc.insertPlaylist(getApplicationContext(), playlist, songlist);
                     onBackPressed();
 

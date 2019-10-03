@@ -39,7 +39,8 @@ public class PlaylistDBController {
         while (cursor.moveToNext()){
             String playlistName = cursor.getString(cursor.getColumnIndex("name"));
             String playlistArt = cursor.getString(cursor.getColumnIndex("album_art"));
-            playlists.add(new PlaylistData(playlistName, playlistArt));
+            int number = cursor.getInt(cursor.getColumnIndex("number_of_songs"));
+            playlists.add(new PlaylistData(playlistName, playlistArt, number));
         }
         cursor.close();
         db.destroyInstance();
@@ -79,7 +80,7 @@ public class PlaylistDBController {
             String album = cursor.getString(cursor.getColumnIndex("album"));
             String artist = cursor.getString(cursor.getColumnIndex("artist"));
             String albumArtUri = cursor.getString(cursor.getColumnIndex("album_art"));
-            String duration = cursor.getString(cursor.getColumnIndex("duration"));;
+            String duration = cursor.getString(cursor.getColumnIndex("duration"));
             audioList.add(new Songs(index, id, data, title, album, artist, albumArtUri, duration));
         }
         cursor.close();
