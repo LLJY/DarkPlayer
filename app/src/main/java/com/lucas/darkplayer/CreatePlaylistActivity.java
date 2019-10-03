@@ -32,7 +32,7 @@ public class CreatePlaylistActivity extends AppCompatActivity {
     static ArrayList<Integer> added= new ArrayList<>();
     List<SongData> data;
     CreatePlaylistRecyclerAdapter adapter;
-    SongsDB db;
+    PlaylistsDB db;
     PlaylistDBController dbc;
     PlaylistFragment pF;
     SongFragment main;
@@ -43,7 +43,7 @@ public class CreatePlaylistActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.create_playlist);
         data = PlaylistDBController.findAudio(this);
-        db = SongsDB.getInstance(this);
+        db = PlaylistsDB.getInstance(this);
         try {
             pF = new PlaylistFragment();
             final RecyclerView recyclerView;
@@ -93,6 +93,7 @@ public class CreatePlaylistActivity extends AppCompatActivity {
                         songlist[i] = songs;
                     }
                     //get the playlistname and first song's album art, then insert it into the database.
+                    //pass 0 as id to tell database to autogenerate it.
                     Playlists playlist = new Playlists(0, playlistName.getText().toString(), data.get(0).getAlbumArt().toString());
                     dbc.insertPlaylist(getApplicationContext(), playlist, songlist);
                     onBackPressed();

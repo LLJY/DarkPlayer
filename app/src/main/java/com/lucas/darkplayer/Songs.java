@@ -28,7 +28,8 @@ import android.support.annotation.NonNull;
         parentColumns = "id",
         childColumns = "playlist_id",
         onDelete = ForeignKey.CASCADE)},
-        tableName = "songs")
+        tableName = "songs",
+        indices = @Index(value = "playlist_id"))
 public class Songs {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "index")
@@ -50,15 +51,15 @@ public class Songs {
     @ColumnInfo(name = "duration")
     private String duration;
 
-    public Songs(int index, String songId, String title, String album, String artist, String albumArt, String duration, int playlistID){
+    public Songs(int index, int playlistID, String songId, String title, String album, String artist, String albumArt, String duration){
         this.index = index;
+        this.playlistID = playlistID;
         this.songId = songId;
         this.title = title;
         this.album = album;
         this.artist = artist;
         this.albumArt = albumArt;
         this.duration = duration;
-        this.playlistID = playlistID;
 
     }
 

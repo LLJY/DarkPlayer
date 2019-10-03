@@ -19,11 +19,12 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
-@Database(entities = {Playlists.class}, version = 1)
+@Database(entities = {Playlists.class, Songs.class}, version = 2)
 public abstract class PlaylistsDB extends RoomDatabase {
     private static final String DB_NAME="playlists_db";
     private static PlaylistsDB instance;
     public abstract PlaylistsDao playlistsDao();
+    public abstract SongsDao songsDao();
 
     public static synchronized PlaylistsDB getInstance(Context context){
         if(instance==null){

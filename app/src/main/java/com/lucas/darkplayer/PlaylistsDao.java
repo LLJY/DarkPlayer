@@ -16,7 +16,8 @@ public interface PlaylistsDao {
     @Query("SELECT id from playlists WHERE name like :name")
     Cursor queryPlaylistID(String name);
 
-    @Query("SELECT MAX(id) from playlists")
+    //return 0 if max returns null when table is empty
+    @Query("SELECT COALESCE(MAX(id), 0)from playlists")
     int queryLastInsert();
 
     @Insert()
