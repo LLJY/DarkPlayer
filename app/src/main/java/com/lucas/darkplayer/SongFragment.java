@@ -249,7 +249,8 @@ public class SongFragment extends Fragment implements Serializable {
                     if (!fromPlaylist) {
                         a = PlaylistDBController.findAudio(getActivity());
                     } else {
-                        a = PlaylistDBController.getSongsFromPlaylist(getActivity(), playlistName);
+                        //get ID from the name by calling function from controller.
+                        a = PlaylistDBController.getSongsFromPlaylist(getActivity(), PlaylistDBController.getPlaylistID(getActivity(), playlistName));
                     }
                 } else {
                     a = new ArrayList<>();

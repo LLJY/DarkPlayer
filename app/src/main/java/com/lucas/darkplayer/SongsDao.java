@@ -10,11 +10,11 @@ import android.database.Cursor;
 @Dao
 public interface SongsDao {
 
-    @Query("SELECT playlist_name from songs")
+    @Query("SELECT playlist_id from songs")
     Cursor queryPlaylists();
 
-    @Query("SELECT * from Songs WHERE playlist_name like :playlistName")
-    Cursor querySongsFromPlaylist(String playlistName);
+    @Query("SELECT * from Songs WHERE playlist_id like :playlistID")
+    Cursor querySongsFromPlaylist(int playlistID);
 
     @Insert()
     void insertPlaylist(Songs songs);

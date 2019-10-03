@@ -18,14 +18,19 @@ import java.io.Serializable;
 
 public class PlaylistData implements Serializable {
     private String playlistName;
-    //private Uri songUrl;
+    private String albumArt;
 
-    public PlaylistData(String playlistName){
+    public PlaylistData(String playlistName, String albumArt){
         this.playlistName = playlistName;
+        this.albumArt = albumArt;
 
     }
 
     public String getPlaylistName() {
         return playlistName;
+    }
+
+    public String getAlbumArt() {
+        return albumArt;
     }
 }

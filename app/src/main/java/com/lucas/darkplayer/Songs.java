@@ -19,20 +19,22 @@ package com.lucas.darkplayer;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
 @Entity(foreignKeys = {
         @ForeignKey(entity = Playlists.class,
-        parentColumns = "name",
-        childColumns = "playlist_name")},
+        parentColumns = "id",
+        childColumns = "playlist_id",
+        onDelete = ForeignKey.CASCADE)},
         tableName = "songs")
 public class Songs {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "index")
     private int index;
-    @ColumnInfo(name = "playlist_name")
-    @NonNull private String playlistName;
+    @ColumnInfo(name = "playlist_id")
+    private int playlistID;
     @ColumnInfo(name = "song_id")
     private String songId;
     @ColumnInfo(name = "title")
@@ -48,8 +50,7 @@ public class Songs {
     @ColumnInfo(name = "duration")
     private String duration;
 
-    public Songs(String playlistName, int index, String songId, String title, String album, String artist, String albumArt, String duration){
-        this.playlistName = playlistName;
+    public Songs(int index, String songId, String title, String album, String artist, String albumArt, String duration, int playlistID){
         this.index = index;
         this.songId = songId;
         this.title = title;
@@ -57,22 +58,20 @@ public class Songs {
         this.artist = artist;
         this.albumArt = albumArt;
         this.duration = duration;
+        this.playlistID = playlistID;
 
     }
+
+    public int getPlaylistID() {
+        return playlistID;
+    }
+
     public String getSongId() {
         return songId;
     }
 
     public void setSongId(String songId) {
         this.songId = songId;
-    }
-
-    public void setPlaylistName(String playlistName) {
-        this.playlistName = playlistName;
-    }
-
-    public String getPlaylistName() {
-        return playlistName;
     }
 
     public String getTitle() {

@@ -10,8 +10,14 @@ import android.database.Cursor;
 @Dao
 public interface PlaylistsDao {
 
-    @Query("SELECT name from playlists")
+    @Query("SELECT * from playlists")
     Cursor queryPlaylists();
+
+    @Query("SELECT id from playlists WHERE name like :name")
+    Cursor queryPlaylistID(String name);
+
+    @Query("SELECT MAX(id) from playlists")
+    int queryLastInsert();
 
     @Insert()
     void insertPlaylist(Playlists playlists);
@@ -21,6 +27,9 @@ public interface PlaylistsDao {
 
     @Delete()
     void deletePlaylist(Playlists playlists);
+
+    @Query("DELETE FROM playlists WHERE id = :id")
+    void deletePlaylistByID(int id);
 
     @Query("DELETE FROM playlists")
     void resetPlaylist();

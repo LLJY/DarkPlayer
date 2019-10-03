@@ -23,17 +23,28 @@ import android.support.annotation.NonNull;
 
 @Entity(tableName = "playlists")
 public class Playlists {
-    @PrimaryKey()
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id")
+    public int id;
     @ColumnInfo(name = "name")
     private String playlistName;
     //this is the associated album art with the playlist, will belong to the first song.
     @ColumnInfo(name = "album_art")
     private String albumArt;
 
-    public Playlists(String playlistName, String albumArt){
+    public Playlists(int id, String playlistName, String albumArt){
+        this.id = id;
         this.playlistName = playlistName;
         this.albumArt = albumArt;
 
+    }
+
+    public int getPlaylistID(){
+        return id;
+    }
+
+    public String getAlbumArt(){
+        return albumArt;
     }
 
     public void setPlaylistName(String playlistName) {

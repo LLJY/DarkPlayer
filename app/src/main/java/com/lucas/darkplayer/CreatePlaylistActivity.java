@@ -79,17 +79,22 @@ public class CreatePlaylistActivity extends AppCompatActivity {
         addPlaylist.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                SongData[] songlist;
                 if(playlistName.getText().toString().matches("")){
                     Toast.makeText(getApplicationContext(), "Please Add Songs Name!", Toast.LENGTH_LONG).show();
                 }else if(added.isEmpty()){
                     Toast.makeText(getApplicationContext(), "Songs is EMPTY, Please Add Songs!!", Toast.LENGTH_LONG).show();
                 }else{
+                    //make an array the size of added.
+                    songlist = new SongData[added.size()];
                     for(int i=0; i<added.size(); i++){
                         int l = added.get(i);
-                        Songs songs = new Songs(playlistName.getText().toString(),0,data.get(l).getSongId(),data.get(l).getTitle(),data.get(l).getAlbum(),data.get(l).getArtist(),data.get(l).getAlbumArt().toString(),data.get(l).getDuration());
-                        db.songsDao().insertPlaylist(songs);
-
+                        SongData songs = new SongData(data.get(l).getSongId(),data.get(l).getTitle(),data.get(l).getAlbum(),data.get(l).getArtist(),data.get(l).getAlbumArt().toString(),data.get(l).getDuration());
+                        songlist[i] = songs;
                     }
+                    //get the playlistname and first song's album art, then insert it into the database.
+                    Playlists playlist = new Playlists(0, playlistName.getText().toString(), data.get(0).getAlbumArt().toString());
+                    dbc.insertPlaylist(getApplicationContext(), playlist, songlist);
                     onBackPressed();
 
                 }
