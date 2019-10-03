@@ -14,7 +14,7 @@
     <android.support.design.card.MaterialCardView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        app:cardBackgroundColor="#202020"
+        app:cardBackgroundColor="@color/darkBackground"
         android:elevation="4dp"
         android:layout_marginStart="12dp"
         android:layout_marginEnd="12dp">

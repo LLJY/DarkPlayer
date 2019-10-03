@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -148,7 +149,7 @@ public class PlaylistFragment extends Fragment {
                                  */
                                 adapter = new PlaylistRecyclerAdapter(playlist, getActivity().getApplication());
                                 recyclerView.setAdapter(adapter);
-                                recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                                recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
                                 recyclerView.setVisibility(View.VISIBLE);
                                 noPlaylistsText.setVisibility(View.GONE);
                                 srl.setRefreshing(false);

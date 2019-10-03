@@ -2,9 +2,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:card_view="http://schemas.android.com/tools"
     android:id="@+id/cardView"
-    app:cardBackgroundColor="@color/cardview_dark_background"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    app:cardBackgroundColor="@color/darkBackground"
+    android:elevation="4dp"
+    android:layout_width="192dp"
+    android:layout_height="262dp"
     android:layout_marginBottom="@dimen/activity_vertical_margin"
     android:clickable="true"
     android:focusable="true"
@@ -14,28 +15,39 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp">
+        android:layout_height="match_parent"
+        android:padding="6dp">
 
         <ImageView
             android:id="@+id/playlist_image"
-            android:layout_width="30dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginRight="16dp"
+            app:srcCompat="@android:drawable/stat_sys_headset"
+            android:drawingCacheQuality="auto"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
             android:adjustViewBounds="true"
+            android:padding="6dp"
             android:scaleType="fitXY" />
 
         <TextView
-            android:id="@+id/playlist_name"
-            android:layout_width="wrap_content"
+            android:id="@id/playlist_name"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/imageView"
-            android:text="Playlist Title"
-            android:textColor="@color/android:white"
-            android:textSize="15sp" />
+            android:layout_below="@+id/playlist_image"
+            android:layout_alignParentStart="true"
+            android:text="playlist_name"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"/>
+
+        <TextView
+            android:id="@+id/playlist_number_of_songs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/playlist_name"
+            android:layout_alignParentStart="true"
+            android:text="number of songs"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"/>
+
 
     </RelativeLayout>
 
