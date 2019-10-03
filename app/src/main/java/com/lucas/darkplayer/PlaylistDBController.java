@@ -73,14 +73,14 @@ public class PlaylistDBController {
         Cursor cursor = db.songsDao().querySongsFromPlaylist(playlistID);
         while(cursor.moveToNext()){
             int index = cursor.getInt(cursor.getColumnIndex("index"));
+            int id = cursor.getInt(cursor.getColumnIndex("playlist_id"));
             String data = cursor.getString(cursor.getColumnIndex("song_id"));
             String title = cursor.getString(cursor.getColumnIndex("title"));
             String album = cursor.getString(cursor.getColumnIndex("album"));
             String artist = cursor.getString(cursor.getColumnIndex("artist"));
             String albumArtUri = cursor.getString(cursor.getColumnIndex("album_art"));
-            String duration = cursor.getString(cursor.getColumnIndex("duration"));
-            int id = cursor.getInt(cursor.getColumnIndex("id"));
-            audioList.add(new Songs(index, index-1, data, title, album, artist, albumArtUri, duration));
+            String duration = cursor.getString(cursor.getColumnIndex("duration"));;
+            audioList.add(new Songs(index, id, data, title, album, artist, albumArtUri, duration));
         }
         cursor.close();
         db.destroyInstance();
