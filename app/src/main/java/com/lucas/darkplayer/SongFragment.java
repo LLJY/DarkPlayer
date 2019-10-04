@@ -461,7 +461,7 @@ public class SongFragment extends Fragment implements Serializable {
                         e.printStackTrace();
                     }
                 }
-                mHandler.postDelayed(this, 100);
+                mHandler.postDelayed(this, 1000);
             }
         });
     }
