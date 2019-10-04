@@ -51,7 +51,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<viewHolder> {
         holder.title.setText(list.get(position).getTitle());
         holder.description.setText(list.get(position).getArtist());
         holder.imageView.setImageURI(list.get(position).getAlbumArt());
-        if(SongFragment.shuffleList[SongFragment.songInList] == position) {
+        if(SongFragment.shuffleList[SongFragment.songInList] == position && !SongFragment.doNotUpdate) {
+            /*
+            * only display the animated bar when
+            * 1. the current position i is selected by SongFragment
+            * 2. SongFragment is currently allowing updating of the ui.
+            *
+             */
             holder.playPause.setVisibility(View.VISIBLE);
             if(SongFragment.pStatus == PlaybackStatus.PLAYING) {
                 holder.playPause.animateBars();

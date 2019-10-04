@@ -82,7 +82,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     public int resumePosition;
     PlaybackStateCompat state;
     public int[] shuffleList;
-    private ArrayList<SongData> audioList;
+    public ArrayList<SongData> audioList;
     int seekTo=0;
     public int index = 0;
     private StoreData storage = new StoreData(this);
@@ -223,6 +223,12 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         sendBroadcast(localintent);
         updatePlayerstateCompat();
 
+    }
+
+    public void updatePlayerService(int[] shuffle, int songInList, ArrayList<SongData> songdata){
+        shuffleList = shuffle;
+        index = songInList;
+        audioList = songdata;
     }
 
     @Override
@@ -526,7 +532,9 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
         * function to reset and then play a song from the selected index
         * this might replace reset() later as in most cases, reset() is used followed by playing a new song.
          */
-        reset();
+        if(mediaPlayer != null) {
+            reset();
+        }
         mediaFile= audioList.get(index).getSongId();
         initMediaPlayer();
     }

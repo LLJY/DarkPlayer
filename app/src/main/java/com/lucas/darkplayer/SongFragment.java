@@ -40,6 +40,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,6 +60,7 @@ public class SongFragment extends Fragment implements Serializable {
     SeekBar songStat;
     static int[] shuffleList;
     boolean permissionGranted, shuffled=false, fromPlaylist=false, shakeToShuffle, serviceBound=false, loop=false;
+    public static boolean doNotUpdate=false;
     //initialise variables
     RecyclerAdapter adapter;
     ImageButton playPause, playPause2, shuffle, repeat;
@@ -271,6 +273,8 @@ public class SongFragment extends Fragment implements Serializable {
                         if (!getActivity().isFinishing()) {
                             if (permissionGranted && a != null && a.size() != 0 ) {
                                 if (fromPlaylist) {
+                                    //always initialize with zero when playlist is opened
+                                    songInList = 0;
                                     shuffleList = new int[audioList.size()];
                                     defaultShuffleList();
                                 }else {
@@ -345,6 +349,14 @@ public class SongFragment extends Fragment implements Serializable {
                                         new RecyclerItemClickListener(getActivity(), recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                                             @Override
                                             public void onItemClick(View view, int position) {
+                                                /*
+                                                 * if audioList is not the same and clicked, set doNotUpdate to false as we are about to update
+                                                 * audioList inside setPlayerStatus()
+                                                 */
+
+                                                if(player != null && player.audioList != audioList) {
+                                                    doNotUpdate = false;
+                                                }
                                                 //store prev to update item so that playing button is shown
                                                 previousSong = shuffleList[songInList];
                                                 onSongChange(previousSong);
@@ -430,23 +442,28 @@ public class SongFragment extends Fragment implements Serializable {
             public void run() {
                 int duration;
                 if(serviceBound){
-                    if(player.mediaPlayer != null){
-                        duration = player.mediaPlayer.getDuration();
-                        current = player.mediaPlayer.getCurrentPosition();
-                        songStat.setMax(duration);
-                        songStat.setProgress(current);
-                        String time = String.format(Locale.ENGLISH, "%02d:%02d",
-                                TimeUnit.MILLISECONDS.toMinutes(duration),
-                                TimeUnit.MILLISECONDS.toSeconds(duration) -
-                                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration))
-                        );
-                        String time1 = String.format(Locale.ENGLISH, "%02d:%02d",
-                                TimeUnit.MILLISECONDS.toMinutes(current),
-                                TimeUnit.MILLISECONDS.toSeconds(current) -
-                                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(current))
-                        );
-                        seekCurr.setText(time1);
-                        seekEnd.setText(time);
+                    try {
+                        //it rarely but sometimes errors out, there is no way around it, hence just add a try-catch
+                        if (player.mediaPlayer != null) {
+                            duration = player.mediaPlayer.getDuration();
+                            current = player.mediaPlayer.getCurrentPosition();
+                            songStat.setMax(duration);
+                            songStat.setProgress(current);
+                            String time = String.format(Locale.ENGLISH, "%02d:%02d",
+                                    TimeUnit.MILLISECONDS.toMinutes(duration),
+                                    TimeUnit.MILLISECONDS.toSeconds(duration) -
+                                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration))
+                            );
+                            String time1 = String.format(Locale.ENGLISH, "%02d:%02d",
+                                    TimeUnit.MILLISECONDS.toMinutes(current),
+                                    TimeUnit.MILLISECONDS.toSeconds(current) -
+                                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(current))
+                            );
+                            seekCurr.setText(time1);
+                            seekEnd.setText(time);
+                        }
+                    }catch(IllegalStateException e){
+                        e.printStackTrace();
                     }
                 }
                 mHandler.postDelayed(this, 100);
@@ -471,15 +488,23 @@ public class SongFragment extends Fragment implements Serializable {
     }
 
     private void playAudio(boolean reset) {
-        Intent playerIntent = new Intent("player");
-        if(reset){
-            playerIntent.putExtra("index", songInList);
-            playerIntent.putExtra("updateIndex", true);
-            playerIntent.putExtra("shuffleList", shuffleList);
-        }
+        /*
+         * completely reset the player to match whatever is loaded into audioList
+         * this is to ensure that when an item is clicked when it a playlist, it does not continue playing the previous songs.
+         */
+        updatePlayerService();
+        player.playIndex(songInList);
         onSongChange(previousSong);
-        getActivity().sendBroadcast(playerIntent);
 
+    }
+
+    private void updatePlayerService() {
+        /*
+         * function that updates the values in PlayerService with values from SongFragment
+         */
+        player.index = songInList;
+        player.shuffleList = shuffleList;
+        player.audioList = audioList;
     }
 
     private void updatePlayerStatus(){
@@ -503,7 +528,9 @@ public class SongFragment extends Fragment implements Serializable {
                 break;
         }
         //update as we need the item to display whether or not it is playing.
-        adapter.updateItem(shuffleList[songInList]);
+        if(adapter != null){
+            adapter.updateItem(shuffleList[songInList]);
+            }
 
     }
 
@@ -512,13 +539,27 @@ public class SongFragment extends Fragment implements Serializable {
             adapter.notifyItemChanged(shuffleList[songInList]);
             adapter.notifyItemChanged(prev);
         }
-        img.setImageURI(audioList.get(shuffleList[songInList]).getAlbumArt());
-        img2.setImageURI(audioList.get(shuffleList[songInList]).getAlbumArt());
-        song.setText(audioList.get(shuffleList[songInList]).getTitle());
-        artist.setText(audioList.get(shuffleList[songInList]).getArtist());
+        if(player == null || player.mediaPlayer == null) {
+            /*
+             *listen to the player for any song changes by default
+             * if it is null, just use whatever we have as values.
+             */
+            img.setImageURI(audioList.get(shuffleList[songInList]).getAlbumArt());
+            img2.setImageURI(audioList.get(shuffleList[songInList]).getAlbumArt());
+            song.setText(audioList.get(shuffleList[songInList]).getTitle());
+            artist.setText(audioList.get(shuffleList[songInList]).getArtist());
+        }else{
+            img.setImageURI(player.audioList.get(player.shuffleList[player.index]).getAlbumArt());
+            img2.setImageURI(player.audioList.get(player.shuffleList[player.index]).getAlbumArt());
+            song.setText(player.audioList.get(player.shuffleList[player.index]).getTitle());
+            artist.setText(player.audioList.get(player.shuffleList[player.index]).getArtist());
+        }
     }
 
     private void setPlayerStatus(boolean skip) {
+        /*
+         * checks current playback status and updates the player accordingly
+         */
         switch (player.pStatus) {
             case PlaybackState.STATE_PAUSED:
                 if (skip) {
@@ -542,7 +583,12 @@ public class SongFragment extends Fragment implements Serializable {
     }
 
     public void nextSong() {
+        //if we do not do this, the service will crash due to index out of bounds error
         if(player.pStatus == PlaybackState.STATE_PLAYING) {
+            if(player != null && player.audioList != audioList){
+                updatePlayerService();
+            }
+
             player.next();
         }else{
             songInList++;
@@ -551,6 +597,10 @@ public class SongFragment extends Fragment implements Serializable {
     }
 
     public void prevSong() {
+        //if we do not do this, the service will crash due to index out of bounds error
+        if(player != null && player.audioList != audioList){
+            updatePlayerService();
+        }
         if(player.pStatus == PlaybackState.STATE_PLAYING) {
             player.prev();
         }else{
@@ -571,6 +621,11 @@ public class SongFragment extends Fragment implements Serializable {
             }catch(NullPointerException e){
                 e.printStackTrace();
             }
+        }
+        if(player != null && player.audioList != audioList){
+            doNotUpdate = true;
+        }else{
+            doNotUpdate = false;
         }
         if(player != null && player.mediaPlayer != null){
             //get songindex and stuff when fragment resumes so that we don't get weird shit
