@@ -690,7 +690,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             if(mediaPlayer != null) {
                updatePlayerstateCompat();
             }
-            mHandler.postDelayed(this, 100);
+            mHandler.postDelayed(this, 1000);
         }
     });
 
