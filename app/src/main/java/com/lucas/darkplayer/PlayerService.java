@@ -506,7 +506,9 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
 
     public void prev() {
         if(index>=0) {
-            index--;
+            if(mediaPlayer.getCurrentPosition() < 3000) {
+                index--;
+            }
             mediaFile = audioList.get(shuffleList[index]).getSongId();
             reset();
             initMediaPlayer();
