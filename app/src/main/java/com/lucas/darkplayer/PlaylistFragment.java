@@ -45,6 +45,8 @@ public class PlaylistFragment extends Fragment {
         newPlaylist = view.findViewById(R.id.add_playlist);
         srl = view.findViewById(R.id.srl);
         recyclerView = view.findViewById(R.id.playlistrecycler);
+        int px = Math.round(CommonMethods.convertDpToPixel(12, getActivity()));
+        recyclerView.addItemDecoration(new SpacesItemDecoration(2, px, false));
         noPlaylistsText = view.findViewById(R.id.no_songs_playlist);
         //We are starting, updateData so dataset(playlists) is not null
         updateData();

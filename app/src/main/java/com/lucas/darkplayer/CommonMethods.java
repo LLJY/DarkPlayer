@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 
 /*      Copyright (C) 2019  Lucas Lee Jing Yi
  *
@@ -32,6 +33,12 @@ public class CommonMethods {
         }
         return -1;
     }
+
+    public static float convertDpToPixel(float dp, Context context){
+        return dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    }
+
+
     public static Bitmap uriToBitmap(Uri uri, Context context){
         Bitmap bitmap = null;
         try {
